@@ -11,6 +11,7 @@ import {
 import { formatUSD, parseDollars, centsToInput } from "@/lib/domain/money";
 import { SPACE_PRESETS, SPACE_TYPES, type SpaceType } from "@/lib/domain/spaces";
 import { Button, Chip, Input, Logo, Notice, Select, Spinner, cx } from "@/components/ui";
+import { FilePicker, type PickedFile } from "@/components/upload/file-picker";
 
 export interface OwnedSpace { id: string; name: string; members: { id: string; name: string; isMe: boolean }[] }
 type Step = "guide" | "pick" | "reading" | "review";
@@ -45,27 +46,14 @@ const emptyGroup = (): ReviewGroup => ({
 export function ImportFlow({ spaces, backHref }: { spaces: OwnedSpace[]; backHref: string }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("guide");
-  const [files, setFiles] = useState<{ file: File; url: string }[]>([]);
+  const [files, setFiles] = useState<PickedFile[]>([]);
   const [progress, setProgress] = useState<Progress[]>([]);
   const [images, setImages] = useState<ImageStatus[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [groups, setGroups] = useState<ReviewGroup[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const input = useRef<HTMLInputElement>(null);
   const reqId = useRef(crypto.randomUUID());
-
-  function addFiles(list: FileList | null) {
-    setError(null);
-    const picked = [...(list ?? [])];
-    const bad = picked.find((f) => !f.type.startsWith("image/") && !/\.(heic|heif)$/i.test(f.name));
-    if (bad) return setError(`${bad.name} isn't an image.`);
-    const big = picked.find((f) => f.size > MAX_BYTES);
-    if (big) return setError(`${big.name} is over 10 MB.`);
-    const next = [...files, ...picked.map((file) => ({ file, url: URL.createObjectURL(file) }))];
-    if (next.length > MAX_IMAGES) return setError(`You can add up to ${MAX_IMAGES} screenshots.`);
-    setFiles(next);
-  }
 
   async function read() {
     setError(null);
@@ -172,23 +160,9 @@ export function ImportFlow({ spaces, backHref }: { spaces: OwnedSpace[]; backHre
             <section className="rise pt-4">
               <h1 className="text-[clamp(28px,6vw,38px)] font-semibold tracking-[-0.04em] leading-tight">Add your screenshots</h1>
               <p className="mt-2 text-muted">Up to {MAX_IMAGES} images, 10 MB each. Group → Balances → screenshot.</p>
-              <div className="mt-6 grid grid-cols-3 sm:grid-cols-4 gap-3">
-                {files.map((f, i) => (
-                  <figure key={f.url} className="relative aspect-[9/16] rounded-[14px] overflow-hidden ring-1 ring-line bg-sunken">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={f.url} alt={`Screenshot ${i + 1}`} className="size-full object-cover" />
-                    <button type="button" aria-label={`Remove screenshot ${i + 1}`} onClick={() => setFiles((fs) => fs.filter((_, j) => j !== i))}
-                      className="absolute top-1.5 right-1.5 grid place-items-center size-8 rounded-full bg-ink/80 text-white text-[16px]">×</button>
-                  </figure>
-                ))}
-                {files.length < MAX_IMAGES && (
-                  <button type="button" onClick={() => input.current?.click()}
-                    className="aspect-[9/16] rounded-[14px] border-2 border-dashed border-line-strong grid place-items-center text-ink-2 hover:border-ink/40 hover:bg-surface transition">
-                    <span className="text-center text-[14px]"><span className="block text-[28px] leading-none mb-1">+</span>Add</span>
-                  </button>
-                )}
+              <div className="mt-6">
+                <FilePicker files={files} onChange={setFiles} onError={setError} kinds={["image"]} max={MAX_IMAGES} maxBytes={MAX_BYTES} camera label="Screenshot" />
               </div>
-              <input ref={input} type="file" accept="image/*" multiple className="sr-only" aria-label="Choose screenshots" onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
               <div className="mt-8 grid gap-3">
                 <Button size="lg" full disabled={!files.length} onClick={read}>Read {files.length || ""} {files.length === 1 ? "screenshot" : "screenshots"}</Button>
                 <Button size="lg" variant="ghost" full onClick={() => setStep("guide")}>Back</Button>
@@ -202,9 +176,9 @@ export function ImportFlow({ spaces, backHref }: { spaces: OwnedSpace[]; backHre
               <p className="mt-2 text-muted">This usually takes a few seconds per image.</p>
               <ul className="mt-6 space-y-2">
                 {files.map((f, i) => (
-                  <li key={f.url} className="flex items-center gap-3 rounded-[14px] bg-surface ring-1 ring-line p-3">
+                  <li key={f.id} className="flex items-center gap-3 rounded-[14px] bg-surface ring-1 ring-line p-3">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={f.url} alt="" className="size-12 rounded-[8px] object-cover object-top" />
+                    <img src={f.url ?? undefined} alt="" className="size-12 rounded-[8px] object-cover object-top" />
                     <span className="flex-1 text-[15px]">Screenshot {i + 1}</span>
                     {progress[i] === "done" ? <Chip tone="success">Read</Chip> : progress[i] === "failed" ? <Chip tone="error">Couldn't read</Chip>
                       : progress[i] === "reading" ? <span className="flex items-center gap-2 text-[13px] text-muted"><Spinner />Reading</span> : <span className="text-[13px] text-muted">Waiting</span>}

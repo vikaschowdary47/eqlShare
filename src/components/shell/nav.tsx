@@ -83,6 +83,7 @@ export function AddMenu({ spaceId, compact }: { spaceId: string; compact?: boole
   const items = [
     { href: `/s/${spaceId}/bills/new`, t: "Expense or bill", d: "Enter an amount and split it" },
     { href: `/s/${spaceId}/auto-bills`, t: "Upload a statement", d: "We read it, you confirm it" },
+    { href: `/import?from=${spaceId}`, t: "Import from Splitwise", d: "Bring balances over from screenshots" },
   ];
   return (
     <div ref={ref} className="relative">

@@ -59,6 +59,13 @@ export default async function Dashboard({ params }: { params: Promise<{ spaceId:
               : "Add what you paid and choose who shares it. Everyone sees exactly what they owe."}
           </EmptyState>
           <div className="space-y-4">
+            {ctx.me?.role === "owner" && (
+              <Card className="p-5">
+                <p className="font-semibold">Coming from Splitwise?</p>
+                <p className="text-[14px] text-muted mt-1">Screenshot your group balances and we'll bring them over. You check every number before anything is saved.</p>
+                <ButtonLink href={`/import?from=${spaceId}`} variant="secondary" size="sm" className="mt-4">Import from Splitwise</ButtonLink>
+              </Card>
+            )}
             {ctx.active.length < 2 && ctx.me?.role === "owner" && (
               <Card className="p-5">
                 <p className="font-semibold">Invite people</p>
