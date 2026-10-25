@@ -19,6 +19,7 @@
   --brand-strong: #E85A4A; /* toggles, focus rings, underlines, large headline words (3:1+) */
   --brand-ink: #B83A2B;    /* brand-coloured text on light backgrounds (5.71:1 on white) */
   --brand-wash: #FDEDEA;   /* tinted backgrounds; brand-ink on it is 5.02:1 */
+  --brand-dark-bg: #1F2937; /* dark icon background; also theme-color in dark mode (layout.tsx) */
   --success: #15803d;
   --success-wash: #e8f5ec;
   --warning: #b45309;
@@ -70,6 +71,11 @@ body {
 /* Money: serif display figures; tabular sans for lists */
 .figure { font-family: var(--font-figure); font-weight: 400; letter-spacing: -0.02em; font-variant-numeric: lining-nums; line-height: 1; }
 .num { font-variant-numeric: tabular-nums; }
+
+/* Logo variants: the dark icon shows only when the app is in dark mode */
+.logo-dark { display: none; }
+:root[data-theme="dark"] .logo-light { display: none; }
+:root[data-theme="dark"] .logo-dark { display: inline; }
 
 :focus-visible { outline: 2px solid var(--brand-strong); outline-offset: 2px; border-radius: 8px; }
 

@@ -12,7 +12,15 @@ export const metadata: Metadata = {
   description: "Eqlshare collects shared bills, splits them to the cent, and shows everyone what is due. No bank account required.",
 };
 
-export const viewport: Viewport = { themeColor: "#f8fafc", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = {
+  // Browser chrome: brand coral in light mode, the dark icon's background in dark mode
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F26B5B" },
+    { media: "(prefers-color-scheme: dark)", color: "#1F2937" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

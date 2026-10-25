@@ -17,16 +17,20 @@ export function Logo({ className, tone = "ink" }: { className?: string; tone?: "
   );
 }
 
-/** The app icon (brand/eqlshare-icon.svg), with rounded corners for in-app use. */
+/**
+ * The app icon with rounded corners for in-app use: brand/eqlshare-icon.svg, or
+ * brand/eqlshare-icon-dark.svg when the app is in dark mode (data-theme="dark" on <html>).
+ */
 export function LogoMark({ size = 26, className }: { size?: number; className?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 1024 1024" aria-hidden="true" className={cx("shrink-0", className)}>
-      <rect width="1024" height="1024" rx="232" fill="var(--brand)" />
-      <circle cx="512" cy="512" r="347" fill="#ffffff" />
-      <rect x="126" y="362" width="772" height="95" fill="var(--brand)" />
-      <rect x="126" y="567" width="772" height="95" fill="var(--brand)" />
+  const mark = (bg: string, fg: string, variant: string) => (
+    <svg width={size} height={size} viewBox="0 0 1024 1024" aria-hidden="true" className={cx("shrink-0", variant, className)}>
+      <rect width="1024" height="1024" rx="232" fill={bg} />
+      <circle cx="512" cy="512" r="347" fill={fg} />
+      <rect x="126" y="362" width="772" height="95" fill={bg} />
+      <rect x="126" y="567" width="772" height="95" fill={bg} />
     </svg>
   );
+  return <>{mark("var(--brand)", "#ffffff", "logo-light")}{mark("var(--brand-dark-bg)", "var(--brand)", "logo-dark")}</>;
 }
 
 /* ---------- buttons ---------- */
