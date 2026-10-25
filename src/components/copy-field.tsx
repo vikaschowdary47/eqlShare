@@ -2,18 +2,14 @@
 
 import { useState } from "react";
 import { Button, cx } from "./ui";
+import { copyText } from "./invite/person-invite";
 
 export function CopyField({ value, label, shareText, mono }: { value: string; label: string; shareText?: string; mono?: boolean }) {
   const [copied, setCopied] = useState(false);
   const canShare = typeof navigator !== "undefined" && "share" in navigator && !!shareText;
   async function copy() {
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      setCopied(false);
-    }
+    setCopied(await copyText(value));
+    setTimeout(() => setCopied(false), 1800);
   }
   return (
     <div>

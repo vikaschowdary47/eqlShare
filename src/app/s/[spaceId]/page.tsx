@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getActivity, getBills, getProfile, getSpaceContext, getStatements } from "@/lib/data";
+import { getActivity, getBills, getProfile, getSpaceContext, getStatements, getUnreadNotifications } from "@/lib/data";
+import { TopNotices } from "@/components/top-notices";
 import { buildAttention } from "@/lib/attention";
 import { memberTotals } from "@/lib/domain/balances";
 import { formatDate, todayISO } from "@/lib/domain/due";
@@ -17,10 +18,11 @@ function greeting() {
   return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
 }
 
-export default async function Dashboard({ params }: { params: Promise<{ spaceId: string }> }) {
+export default async function Dashboard({ params, searchParams }: { params: Promise<{ spaceId: string }>; searchParams: Promise<{ claimed?: string }> }) {
   const { spaceId } = await params;
+  const claimed = Math.min(Math.max(Number((await searchParams).claimed) || 0, 0), 99);
   const ctx = (await getSpaceContext(spaceId))!;
-  const [bills, statements, activity, profile] = await Promise.all([getBills(spaceId, ctx), getStatements(spaceId), getActivity(spaceId, 6), getProfile()]);
+  const [bills, statements, activity, profile, notes] = await Promise.all([getBills(spaceId, ctx), getStatements(spaceId), getActivity(spaceId, 6), getProfile(), getUnreadNotifications()]);
   const meId = ctx.formerMe?.id ?? null;
   const today = todayISO();
   const preset = SPACE_PRESETS[ctx.space.type];
@@ -42,6 +44,7 @@ export default async function Dashboard({ params }: { params: Promise<{ spaceId:
   if (bills.length === 0 && statements.length === 0) {
     return (
       <div className="space-y-8">
+        <TopNotices notes={notes} claimed={claimed} />
         <header className="rise">
           <p className="text-[14px] text-muted">{greeting()}{firstName ? `, ${firstName}` : ""}</p>
           <h1 className="text-[clamp(30px,5vw,40px)] font-semibold tracking-[-0.04em] leading-tight">{ctx.space.name}</h1>
@@ -93,6 +96,7 @@ export default async function Dashboard({ params }: { params: Promise<{ spaceId:
 
   return (
     <div className="space-y-10">
+      <TopNotices notes={notes} claimed={claimed} />
       <header className="flex items-end justify-between gap-4 rise">
         <div>
           <p className="text-[14px] text-muted">{greeting()}{firstName ? `, ${firstName}` : ""}</p>

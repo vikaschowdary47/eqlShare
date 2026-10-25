@@ -43,7 +43,7 @@ export default async function SpacePage({ params, searchParams }: { params: Prom
 
       <Section id="members" title="Members" desc="People who can see this Space's bills.">
         <Members spaceId={spaceId} spaceName={ctx.space.name} meId={ctx.me?.id ?? null} isOwner={!!isOwner}
-          members={ctx.members.map((m) => ({ id: m.id, name: m.name, role: m.role, status: m.status, joined: m.joined_at, left: m.left_at, placeholder: m.placeholder }))} />
+          members={ctx.members.map((m) => ({ id: m.id, name: m.name, role: m.role, status: m.status, joined: m.joined_at, left: m.left_at, placeholder: m.placeholder, personId: m.person_id }))} />
       </Section>
 
       {isOwner && (

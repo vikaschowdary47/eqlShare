@@ -32,6 +32,7 @@ function describe(a: ActivityItem, who: string): string {
     case "statement_dismissed": return `${who} dismissed ${m.provider ? `a ${m.provider} statement` : "a statement"}`;
     case "opening_balances_imported": return `${who} imported ${m.count} opening ${m.count === 1 ? "balance" : "balances"} from Splitwise`;
     case "import_undone": return `${who} undid a Splitwise import`;
+    case "placeholder_added": return `${who} added ${m.name ? `“${m.name}”` : "someone"}, who hasn't joined yet`;
     case "claim_link_created": return `${who} created an invite link for someone who hasn't joined`;
     case "placeholder_claimed": return `${who} joined and took over ${m.name ? `“${m.name}”` : "an imported member"}`;
     default: return `${who} made a change`;

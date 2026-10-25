@@ -53,7 +53,13 @@ const MESSAGES: Record<string, string> = {
   no_reminders_for_opening_balance: "Opening balances don't send reminders.",
   not_a_placeholder: "This person has already joined.",
   claim_invalid: "This invite link has expired, was already used, or was revoked. Ask for a new one.",
-  already_member: "You're already a member of this Space, so you can't claim another person in it.",
+  already_member: "You're already in every Space this invite is for, so there's nothing new to join.",
+  claim_own_invite: "This is an invite you created. Send it to the person it's for.",
+  duplicate_balance: "A person appears twice in the same Space. Merge them first.",
+  empty_space: "A Space has no balances. Remove it or add a balance.",
+  bad_people: "Something went wrong. Please try again.",
+  bad_member: "Something went wrong. Please try again.",
+  bad_person_name: "Add a name (up to 80 characters).",
   undo_blocked: "This import can't be undone because something has happened since: a payment, a new bill, a dispute or someone joining.",
   import_source_reserved: "Something went wrong. Please try again.",
 };
@@ -408,23 +414,47 @@ export async function undoImportAction(batchId: string): Promise<Result> {
   return { ok: true, data: undefined };
 }
 
-export async function createClaimLinkAction(spaceId: string, memberId: string): Promise<Result<{ url: string }>> {
+export async function createPersonClaimAction(personId: string): Promise<Result<{ url: string }>> {
+  if (!uuid.safeParse(personId).success) return { ok: false, error: "Unknown person." };
   const supabase = await supabaseServer();
-  const { data, error } = await supabase.rpc("create_member_claim", { p_member: memberId });
+  const { data, error } = await supabase.rpc("create_person_claim", { p_person: personId });
   if (error) return { ok: false, error: friendly(error) };
-  revalidatePath(`/s/${spaceId}/space`);
   return { ok: true, data: { url: `${env.siteUrl()}/claim/${data}` } };
 }
 
-export async function revokeClaimLinksAction(spaceId: string, memberId: string): Promise<Result> {
-  return simpleRpc(spaceId, "revoke_member_claims", { p_member: memberId });
+export async function revokePersonClaimsAction(spaceId: string, personId: string): Promise<Result> {
+  return simpleRpc(spaceId, "revoke_person_claims", { p_person: personId });
 }
 
-export async function claimMemberAction(token: string): Promise<Result> {
+/** Adds someone who hasn't joined, by name only. Phone and email are never sent here. */
+export async function addPersonAction(spaceId: string, name: string): Promise<Result<{ personId: string; memberId: string }>> {
+  if (!uuid.safeParse(spaceId).success) return { ok: false, error: "Unknown Space." };
+  const clean = name.replace(/\s+/g, " ").trim();
+  if (!clean || clean.length > 80) return { ok: false, error: MESSAGES.bad_person_name };
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc("add_placeholder_member", { p_space: spaceId, p_name: clean });
+  if (error) return { ok: false, error: friendly(error) };
+  revalidatePath(`/s/${spaceId}`, "layout");
+  const r = data as { person_id: string; member_id: string };
+  return { ok: true, data: { personId: r.person_id, memberId: r.member_id } };
+}
+
+export async function claimPersonAction(token: string): Promise<Result> {
   if (!/^[0-9a-f]{64}$/.test(token)) return { ok: false, error: MESSAGES.claim_invalid };
   const supabase = await supabaseServer();
-  const { data, error } = await supabase.rpc("claim_member", { p_token: token });
+  const { data, error } = await supabase.rpc("claim_person", { p_token: token });
   if (error) return { ok: false, error: friendly(error) };
-  await rememberSpace(data as string);
-  redirect(`/s/${data}?claimed=1`);
+  const ids = (data as { space_ids: string[] }).space_ids;
+  await rememberSpace(ids[0]);
+  revalidatePath("/", "layout");
+  redirect(`/s/${ids[0]}?claimed=${ids.length}`);
+}
+
+export async function dismissNotificationsAction(ids: number[]): Promise<Result> {
+  if (!ids.length || ids.some((i) => !Number.isSafeInteger(i))) return { ok: true, data: undefined };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc("mark_notifications_read", { p_ids: ids });
+  if (error) return { ok: false, error: friendly(error) };
+  revalidatePath("/", "layout");
+  return { ok: true, data: undefined };
 }

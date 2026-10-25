@@ -16,6 +16,8 @@ export interface Member {
   id: string; user_id: string | null; role: Role; status: "active" | "inactive"; joined_at: string; left_at: string | null; name: string;
   /** Imported from Splitwise and not yet claimed by a real account. */
   placeholder: boolean; import_batch_id: string | null;
+  /** Set for people who haven't joined: one person can be a placeholder in several Spaces. */
+  person_id: string | null;
 }
 export interface Settlement {
   id: string; amount_cents: number; status: SettlementStatus; method: string | null; note: string | null;
@@ -96,14 +98,14 @@ export const getSpaceContext = cache(async (spaceId: string) => {
   const supabase = await supabaseServer();
   const [{ data: space }, { data: rows }] = await Promise.all([
     supabase.from("spaces").select("id, name, type, currency, default_split, inbound_token, created_at").eq("id", spaceId).maybeSingle(),
-    supabase.from("space_members").select("id, user_id, display_name, role, status, joined_at, left_at, import_batch_id").eq("space_id", spaceId).order("joined_at"),
+    supabase.from("space_members").select("id, user_id, display_name, role, status, joined_at, left_at, import_batch_id, person_id").eq("space_id", spaceId).order("joined_at"),
   ]);
   if (!space || !rows) return null;
   const userIds = rows.map((r) => r.user_id).filter((u): u is string => !!u);
   const { data: profiles } = userIds.length ? await supabase.from("profiles").select("id, display_name").in("id", userIds) : { data: [] };
   const names = new Map((profiles ?? []).map((p) => [p.id, p.display_name as string]));
   const members: Member[] = rows.map((r) => ({
-    id: r.id, user_id: r.user_id, role: r.role, status: r.status, joined_at: r.joined_at, left_at: r.left_at, import_batch_id: r.import_batch_id,
+    id: r.id, user_id: r.user_id, role: r.role, status: r.status, joined_at: r.joined_at, left_at: r.left_at, import_batch_id: r.import_batch_id, person_id: r.person_id,
     placeholder: r.user_id === null,
     name: r.user_id ? names.get(r.user_id) ?? r.display_name ?? "Former member" : r.display_name ?? "Unnamed",
   }));
@@ -184,16 +186,49 @@ export async function getActivity(spaceId: string, limit = 50) {
 
 export { missingStatements } from "./data-pure";
 
-/** Spaces the viewer owns, with their other active members, for "Add to existing Space" in the import review. */
-export async function getOwnedSpacesWithMembers() {
-  const user = await getUser();
-  if (!user) return [];
-  const spaces = (await getMySpaces()).filter((s) => s.role === "owner");
-  const out: { id: string; name: string; members: { id: string; name: string; isMe: boolean }[] }[] = [];
-  for (const s of spaces) {
+/**
+ * Every Space the viewer is active in, with their running balance against each other member
+ * (positive = that member owes the viewer). Used to spot balances an import would double count.
+ */
+export async function getExistingSpacesForImport() {
+  const out: { id: string; name: string; activeCount: number; owner: boolean; members: { id: string; name: string; netWithMeCents: number }[] }[] = [];
+  for (const s of await getMySpaces()) {
     const ctx = await getSpaceContext(s.id);
-    if (!ctx) continue;
-    out.push({ id: s.id, name: s.name, members: ctx.active.map((m) => ({ id: m.id, name: m.placeholder ? `${m.name} (not joined)` : m.name, isMe: m.user_id === user.id })) });
+    if (!ctx?.me) continue;
+    const net = new Map<string, number>();
+    for (const b of await getBills(s.id, ctx)) {
+      for (const sp of b.splits) {
+        if (b.payer.id === ctx.me.id && sp.member.id !== ctx.me.id) net.set(sp.member.id, (net.get(sp.member.id) ?? 0) + sp.position.outstandingCents);
+        if (sp.member.id === ctx.me.id && b.payer.id !== ctx.me.id) net.set(b.payer.id, (net.get(b.payer.id) ?? 0) - sp.position.outstandingCents);
+      }
+    }
+    out.push({
+      id: s.id, name: s.name, activeCount: ctx.active.length, owner: s.role === "owner",
+      members: ctx.active.filter((m) => m.id !== ctx.me!.id).map((m) => ({ id: m.id, name: m.name, netWithMeCents: net.get(m.id) ?? 0 })),
+    });
   }
   return out;
+}
+
+/** People from one of the viewer's imports, each once, with the Spaces they're in. */
+export async function getImportPeople(batchId: string) {
+  const supabase = await supabaseServer();
+  const { data: people } = await supabase.from("import_people").select("id, display_name, claimed_at").eq("import_batch_id", batchId).order("display_name");
+  if (!people?.length) return [];
+  const { data: rows } = await supabase.from("space_members").select("person_id, status, user_id, spaces(id, name)").in("person_id", people.map((p) => p.id));
+  return people.map((p) => ({
+    id: p.id as string, name: p.display_name as string, claimed: !!p.claimed_at,
+    spaces: (rows ?? []).filter((r) => r.person_id === p.id && r.status === "active").flatMap((r) => {
+      const sp = r.spaces as unknown as { id: string; name: string } | null;
+      return sp ? [sp] : [];
+    }).sort((a, b) => a.name.localeCompare(b.name)),
+  }));
+}
+
+export async function getUnreadNotifications() {
+  const user = await getUser();
+  if (!user) return [];
+  const supabase = await supabaseServer();
+  const { data } = await supabase.from("user_notifications").select("id, kind, payload, created_at").is("read_at", null).order("created_at", { ascending: false }).limit(10);
+  return (data ?? []) as { id: number; kind: string; payload: Record<string, unknown>; created_at: string }[];
 }

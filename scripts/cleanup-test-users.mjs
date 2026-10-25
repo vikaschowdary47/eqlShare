@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * Deletes e2e test users (@eqlshare-test.dev only) and everything they created:
- * their Spaces (with bills, members, claims, statements, activity), stored statement
- * files and import batches. Reads NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
- * from web/.env. Never prints keys.
+ * their Spaces (with bills, members, statements, activity), stored statement files,
+ * imported people and their claim links, and import batches.
+ * Reads NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY from web/.env. Never prints keys.
  *
  *   node scripts/cleanup-test-users.mjs --all              every @eqlshare-test.dev user
  *   node scripts/cleanup-test-users.mjs a@eqlshare-test.dev b@eqlshare-test.dev
@@ -43,12 +43,10 @@ if (args.includes("--all")) {
   targets = testUsers.filter((u) => args.includes(u.email));
   for (const e of args) if (!targets.some((u) => u.email === e)) console.log(`${e}: not found`);
 }
-// Owners first, so Spaces they created are gone before their members are deleted
-const { data: owned } = await admin.from("spaces").select("created_by").in("created_by", targets.map((u) => u.id));
-const owners = new Set((owned ?? []).map((s) => s.created_by));
-targets.sort((a, b) => Number(owners.has(b.id)) - Number(owners.has(a.id)));
-
-let failed = 0;
+// Two passes: everyone's data first, then the accounts, because one test user can be a
+// member of (or have claimed a person in) another's Space
+const failures = new Map();
+const report = [];
 for (const u of targets) {
   const { data: spaces } = await admin.from("spaces").select("id").eq("created_by", u.id);
   const ids = (spaces ?? []).map((s) => s.id);
@@ -62,7 +60,7 @@ for (const u of targets) {
       }
     }
     // bill_splits reference members without cascade, so bills go before Spaces
-    for (const t of ["activity", "statements", "bills", "member_claims", "space_invitations"]) {
+    for (const t of ["activity", "statements", "bills", "space_invitations"]) {
       const { error } = await admin.from(t).delete().in("space_id", ids);
       if (error) errors.push(`${t}: ${error.message}`);
     }
@@ -71,12 +69,21 @@ for (const u of targets) {
     const { error } = await admin.from("spaces").delete().in("id", ids);
     if (error) errors.push(`spaces: ${error.message}`);
   }
+  // People they added or claimed (claim links cascade), before the batches those people came from
+  const { error: peopleErr } = await admin.from("import_people").delete().or(`owner_id.eq.${u.id},claimed_by.eq.${u.id}`);
+  if (peopleErr) errors.push(`import_people: ${peopleErr.message}`);
   const { error: batchErr } = await admin.from("import_batches").delete().eq("created_by", u.id);
   if (batchErr) errors.push(`import_batches: ${batchErr.message}`);
+  failures.set(u.id, errors);
+  report.push([u, ids.length]);
+}
+let failed = 0;
+for (const [u, spaces] of report) {
+  const errors = failures.get(u.id);
   const { error: userErr } = await admin.auth.admin.deleteUser(u.id);
   if (userErr) errors.push(`user: ${userErr.message}`);
   if (errors.length) failed++;
-  console.log(`${u.email}: ${errors.length ? `FAILED (${errors.join("; ")})` : `deleted, ${ids.length} Space(s)`}`);
+  console.log(`${u.email}: ${errors.length ? `FAILED (${errors.join("; ")})` : `deleted, ${spaces} Space(s)`}`);
 }
 
 const { data: after } = await admin.auth.admin.listUsers({ perPage: 1000 });

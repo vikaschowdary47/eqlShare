@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
-  createClaimLinkAction, createInviteAction, deactivateMemberAction, revokeClaimLinksAction, revokeInviteAction, setRoleAction, updateNameAction, updatePrefsAction, updateSpaceAction, type Result,
+  addPersonAction, createInviteAction, createPersonClaimAction, deactivateMemberAction, revokeInviteAction, revokePersonClaimsAction, setRoleAction, updateNameAction, updatePrefsAction, updateSpaceAction, type Result,
 } from "@/lib/actions";
+import { AddPersonForm, PersonInvite } from "./invite/person-invite";
 import { SPACE_PRESETS, SPACE_TYPES, type SpaceType } from "@/lib/domain/spaces";
 import { Avatar, Button, Chip, Field, Input, Notice, Select, cx } from "./ui";
 import { CopyField } from "./copy-field";
@@ -65,52 +66,59 @@ export function SpaceDetails({ spaceId, name: n0, type: t0, defaultSplit: d0, ca
   );
 }
 
-type MemberRow = { id: string; name: string; role: string; status: string; joined: string; left: string | null; placeholder: boolean };
+type MemberRow = { id: string; name: string; role: string; status: string; joined: string; left: string | null; placeholder: boolean; personId: string | null };
 
 export function Members({ spaceId, spaceName, members, meId, isOwner }: { spaceId: string; spaceName: string; meId: string | null; isOwner: boolean; members: MemberRow[] }) {
+  const router = useRouter();
   const r = useRun();
   const [confirm, setConfirm] = useState<string | null>(null);
+  // Personal links by person; each is shared on its own, never pasted together into one message
   const [links, setLinks] = useState<Record<string, string>>({});
+  const [contacts, setContacts] = useState<Record<string, { phone?: string; email?: string }>>({});
   const [busyAll, setBusyAll] = useState(false);
-  const pending = members.filter((m) => m.placeholder && m.status === "active");
+  const [adding, setAdding] = useState(false);
+  const pending = members.filter((m) => m.placeholder && m.status === "active" && m.personId);
 
   async function inviteAll() {
     setBusyAll(true);
     const next = { ...links };
     for (const m of pending) {
-      if (next[m.id]) continue;
-      const res = await createClaimLinkAction(spaceId, m.id);
-      if (res.ok) next[m.id] = res.data.url;
+      if (next[m.personId!]) continue;
+      const res = await createPersonClaimAction(m.personId!);
+      if (res.ok) next[m.personId!] = res.data.url;
     }
     setLinks(next);
     setBusyAll(false);
   }
+  const create = (personId: string) => async () => {
+    const res = await createPersonClaimAction(personId);
+    if (res.ok) setLinks((l) => ({ ...l, [personId]: res.data.url }));
+    return res;
+  };
 
   return (
     <div>
       {r.error && <div className="mb-3"><Notice tone="error" title={r.error} /></div>}
       {isOwner && pending.length > 0 && (
         <div className="mb-4 rounded-[14px] bg-teal-wash/60 ring-1 ring-teal/20 p-4 flex flex-wrap items-center gap-3">
-          <p className="flex-1 min-w-[200px] text-[14px] text-ink-2"><strong className="text-ink">{pending.length} {pending.length === 1 ? "person hasn't" : "people haven't"} joined.</strong> Each gets a personal link that connects them to their own balance.</p>
+          <p className="flex-1 min-w-[200px] text-[14px] text-ink-2"><strong className="text-ink">{pending.length} {pending.length === 1 ? "person hasn't" : "people haven't"} joined.</strong> Each gets a personal link to their own balances. Send each one only to that person.</p>
           <Button size="sm" loading={busyAll} onClick={inviteAll}>Invite all</Button>
         </div>
-      )}
-      {Object.keys(links).length > 1 && (
-        <div className="mb-4"><CopyField label="All invite links" value={pending.filter((m) => links[m.id]).map((m) => `${m.name}: ${links[m.id]}`).join("\n")} shareText={`Join ${spaceName} on Eqlshare`} /></div>
       )}
       <ul className="divide-y divide-line">
         {members.map((m) => {
           const me = m.id === meId;
+          const link = m.personId ? links[m.personId] : undefined;
           return (
             <li key={m.id} className="py-3.5 flex flex-wrap items-center gap-3">
               <Avatar name={m.name} size={36} muted={m.status === "inactive" || m.placeholder} />
               <div className="flex-1 min-w-0">
                 <p className="text-[15px] font-medium truncate">{m.name}{me && <span className="text-muted font-normal"> (you)</span>}</p>
-                <p className="text-[13px] text-muted">{m.status === "inactive" ? `Left ${m.left?.slice(0, 10)}` : m.placeholder ? "Imported from Splitwise" : `Joined ${m.joined.slice(0, 10)}`}</p>
+                <p className="text-[13px] text-muted">{m.status === "inactive" ? `Left ${m.left?.slice(0, 10)}` : m.placeholder ? "Hasn't joined yet" : `Joined ${m.joined.slice(0, 10)}`}</p>
               </div>
               {m.status === "inactive" ? <Chip>Former member</Chip> : m.placeholder ? <Chip tone="warning">Not joined</Chip> : m.role === "owner" ? <Chip tone="teal">Owner</Chip> : <Chip>Member</Chip>}
-              {m.status === "active" && m.placeholder && isOwner && !links[m.id] && (
-                <Button size="sm" variant="secondary" onClick={() => r.run(() => createClaimLinkAction(spaceId, m.id), undefined, (res) => res.ok && setLinks((l) => ({ ...l, [m.id]: (res.data as { url: string }).url })))}>Invite</Button>
+              {m.status === "active" && m.placeholder && isOwner && m.personId && (
+                <PersonInvite name={m.name} spaceNames={[spaceName]} url={link ?? null} onCreate={create(m.personId)} contact={contacts[m.personId]} />
               )}
               {m.status === "active" && (isOwner || me) && (
                 confirm === m.id ? (
@@ -126,16 +134,36 @@ export function Members({ spaceId, spaceName, members, meId, isOwner }: { spaceI
                   </div>
                 )
               )}
-              {links[m.id] && (
-                <div className="w-full pl-12 space-y-2">
-                  <CopyField label={`Personal invite for ${m.name}`} value={links[m.id]} shareText={`${m.name}, join ${spaceName} on Eqlshare`} />
-                  <p className="text-[12px] text-muted">Works once, for {m.name} only, for 14 days. Creating a new link cancels this one. <button type="button" className="underline underline-offset-2" onClick={() => r.run(() => revokeClaimLinksAction(spaceId, m.id), undefined, () => setLinks((l) => { const n = { ...l }; delete n[m.id]; return n; }))}>Revoke</button></p>
-                </div>
+              {link && m.personId && (
+                <p className="w-full pl-12 text-[12px] text-muted">Works once, for {m.name} only, for 14 days, and covers every Space they're in. Creating a new link cancels this one.{" "}
+                  <button type="button" className="underline underline-offset-2" onClick={() => r.run(() => revokePersonClaimsAction(spaceId, m.personId!), undefined, () => setLinks((l) => { const n = { ...l }; delete n[m.personId!]; return n; }))}>Revoke</button>
+                </p>
               )}
             </li>
           );
         })}
       </ul>
+      {isOwner && (
+        <div className="mt-4">
+          {adding ? (
+            <div className="rounded-[16px] ring-1 ring-line bg-surface p-4">
+              <p className="font-semibold mb-3">Add someone new</p>
+              <AddPersonForm submitLabel="Add and invite" onCancel={() => setAdding(false)} onAdd={async (name, contact) => {
+                const res = await addPersonAction(spaceId, name);
+                if (!res.ok) return res.error;
+                const link = await createPersonClaimAction(res.data.personId);
+                if (link.ok) setLinks((l) => ({ ...l, [res.data.personId]: link.data.url }));
+                if (contact.phone || contact.email) setContacts((c) => ({ ...c, [res.data.personId]: contact }));
+                setAdding(false);
+                router.refresh();
+                return null;
+              }} />
+            </div>
+          ) : (
+            <Button variant="secondary" onClick={() => setAdding(true)}>+ Add someone new</Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
