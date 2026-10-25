@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Eqlshare web
 
-## Getting Started
+Next.js 15 (App Router, TypeScript, Tailwind 4) + Supabase. Product source of truth: `../EQLSHARE_MASTER_BUILD_SPEC_V0.3.md`.
 
-First, run the development server:
+## Setup
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. `cp .env.example .env.local` and fill in your Supabase URL and anon key.
+2. Apply the migrations to your project: `supabase link --project-ref <ref>` then `supabase db push`.
+3. In Supabase Auth settings, set the Site URL to `NEXT_PUBLIC_SITE_URL` and add `<site>/auth/callback` to the redirect URLs.
+4. `npm install && npm run dev`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Checks
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `npx vitest run`: domain tests (cent-exact splits, balances, due states, statement parsing)
+- `npm run lint`, `npx tsc --noEmit`, `npm run build`
+- `scripts/test-db.sh`: applies every migration to a throwaway Postgres (with `supabase/tests/supabase_shim.sql` standing in for Supabase auth) and runs the authorization and Auto Bills tests. Set `PGHOST`, `PGPORT` and `PGUSER` for a local Postgres.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Architecture
 
-## Learn More
+- `src/lib/domain/`: pure business rules shared by UI and server (money in integer cents, splits, balances, due states, statement extraction). No I/O.
+- `supabase/migrations/`: schema, RLS (members can read their Space), and SECURITY DEFINER functions. **All writes go through these functions**, which re-validate every money invariant and permission. Clients have no insert/update/delete grants.
+- `src/lib/actions.ts`: server actions that call those functions and turn database error codes into plain-English messages.
+- `src/app/s/[spaceId]/…`: the app (Home, Bills, Activity, Space, Auto Bills).
+- Space type (`shared_home | couple | family | group`) is a preset that changes labels and defaults only.
 
-To learn more about Next.js, take a look at the following resources:
+## Not in this build (by design)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+No bank connections, payments or fund transfers. Email forwarding works only when `INBOUND_WEBHOOK_SECRET` and `SUPABASE_SERVICE_ROLE_KEY` are set and an inbound email provider posts to `/api/inbound/email`. Until then, use PDF upload. Reminder emails aren't sent; reminders are shareable links.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Import from Splitwise
 
-## Deploy on Vercel
+Screenshot-first; Splitwise is never contacted. `src/lib/import/extract.ts` is the only file that knows the vision provider (Gemini, `GEMINI_MODEL`, default `gemini-3.1-flash-lite`). Pure logic (validation, merging, duplicate detection, debt simplification, review checks) lives in `src/lib/domain/import.ts`. Opening balances are bills with `source = 'import'`: no due date, no reminders, settled through the normal report/confirm flow. People who haven't joined are placeholder members (`user_id` null) with single-use claim links (`/claim/<hex>`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Live extraction check (spends a fraction of a cent): `GEMINI_LIVE=1 node --env-file=.env node_modules/.bin/vitest run tests/gemini.live.test.ts`

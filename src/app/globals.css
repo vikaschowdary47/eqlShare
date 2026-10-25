@@ -1,26 +1,99 @@
 @import "tailwindcss";
 
+/*
+  Eqlshare design tokens. Light-first fintech: porcelain ground, ink text,
+  one restrained teal, serif figures for money, Geist for everything else.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ground: #f8fafc;
+  --surface: #ffffff;
+  --sunken: #f1f4f6;
+  --ink: #0b1a18;
+  --ink-2: #33433f;
+  --muted: #5d6b68;
+  --line: #e3e8ec;
+  --line-strong: #cfd7dc;
+  --teal: #0f766e;
+  --teal-ink: #0b5953;
+  --teal-wash: #e7f4f2;
+  --success: #15803d;
+  --success-wash: #e8f5ec;
+  --warning: #b45309;
+  --warning-wash: #fdf3e5;
+  --error: #b91c1c;
+  --error-wash: #fbebeb;
+  --night: #0b1a18;
+  --night-2: #13302c;
+  --ease: cubic-bezier(0.2, 0.75, 0.1, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-teal: var(--teal);
+  --color-teal-ink: var(--teal-ink);
+  --color-teal-wash: var(--teal-wash);
+  --color-success: var(--success);
+  --color-success-wash: var(--success-wash);
+  --color-warning: var(--warning);
+  --color-warning-wash: var(--warning-wash);
+  --color-error: var(--error);
+  --color-error-wash: var(--error-wash);
+  --color-night: var(--night);
+  --color-night-2: var(--night-2);
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-figure: var(--font-serif), ui-serif, Georgia, serif;
+  --ease-out-soft: var(--ease);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html { -webkit-text-size-adjust: 100%; }
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Money: serif display figures; tabular sans for lists */
+.figure { font-family: var(--font-figure); font-weight: 400; letter-spacing: -0.02em; font-variant-numeric: lining-nums; line-height: 1; }
+.num { font-variant-numeric: tabular-nums; }
+
+:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 8px; }
+
+/* Quiet entrance used by page sections */
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+.rise { animation: rise 0.6s var(--ease) both; }
+.rise-2 { animation: rise 0.6s 0.06s var(--ease) both; }
+.rise-3 { animation: rise 0.6s 0.12s var(--ease) both; }
+
+@keyframes grow-x { from { transform: scaleX(0); } }
+.grow-x { transform-origin: left; animation: grow-x 0.9s var(--ease) both; }
+
+@keyframes shimmer { to { background-position: -200% 0; } }
+.skeleton {
+  background: linear-gradient(90deg, var(--sunken) 25%, #e8edf0 50%, var(--sunken) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 12px;
+}
+
+/* Fine grain on dark cards for depth without gradients */
+.grain { isolation: isolate; }
+.grain::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0.5;
+  background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }

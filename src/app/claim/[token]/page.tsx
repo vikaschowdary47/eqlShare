@@ -1,0 +1,74 @@
+import { createHash } from "node:crypto";
+import { headers } from "next/headers";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { getUser } from "@/lib/data";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { formatUSD } from "@/lib/domain/money";
+import { ButtonLink, EqualsArt, Logo, Money } from "@/components/ui";
+import { AcceptClaim } from "@/components/accept-claim";
+
+export const metadata: Metadata = { title: "Join your Space", robots: { index: false } };
+
+type Preview = { valid: boolean; space_name: string | null; member_name: string | null; net_cents: number | null; rate_limited: boolean };
+
+/** Only the Space name and this one person's balance are ever shown here. */
+async function preview(token: string): Promise<Preview> {
+  const admin = supabaseAdmin();
+  if (!admin || !/^[0-9a-f]{64}$/.test(token)) return { valid: false, space_name: null, member_name: null, net_cents: null, rate_limited: false };
+  const h = await headers();
+  const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || h.get("x-real-ip") || "unknown";
+  // Hash so raw IPs are never stored
+  const clientKey = createHash("sha256").update(`${ip}|${process.env.SUPABASE_SERVICE_ROLE_KEY}`).digest("hex");
+  const { data } = await admin.rpc("preview_member_claim", { p_token: token, p_client_key: clientKey });
+  return ((data as Preview[] | null)?.[0]) ?? { valid: false, space_name: null, member_name: null, net_cents: null, rate_limited: false };
+}
+
+export default async function ClaimPage({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
+  const [p, user] = await Promise.all([preview(token), getUser()]);
+  const here = `/claim/${token}`;
+
+  let body: React.ReactNode;
+  if (p.rate_limited) {
+    body = <><h1 className="text-[30px] font-semibold tracking-[-0.035em]">Too many attempts</h1><p className="text-muted mt-3">Please wait a few minutes and open the link again.</p></>;
+  } else if (!p.valid) {
+    body = (
+      <>
+        <EqualsArt />
+        <h1 className="mt-6 text-[30px] font-semibold tracking-[-0.035em] leading-tight">This invite link doesn't work</h1>
+        <p className="text-muted mt-3">It may have expired, been used already, or been replaced by a newer link. Ask the person who invited you to send a new one.</p>
+        <ButtonLink href={user ? "/home" : "/"} variant="secondary" size="lg" className="mt-8">{user ? "Go to my Spaces" : "Go to Eqlshare"}</ButtonLink>
+      </>
+    );
+  } else {
+    const net = p.net_cents ?? 0;
+    body = (
+      <>
+        <p className="text-[13px] font-medium text-teal-ink tracking-[0.14em] uppercase">You're invited</p>
+        <h1 className="mt-2 text-[34px] font-semibold tracking-[-0.04em] leading-[1.05]">Join {p.space_name}</h1>
+        <p className="text-muted mt-3">Your balances were brought over from Splitwise as <strong className="text-ink font-medium">{p.member_name}</strong>.</p>
+        <div className="mt-6 rounded-[20px] bg-night text-white p-6 grain relative overflow-hidden">
+          <p className="text-[14px] text-white/65">{net < 0 ? "You owe" : net > 0 ? "You're owed" : "Your balance"}</p>
+          <Money cents={Math.abs(net)} size="lg" className="block mt-1 text-white" />
+          <p className="mt-2 text-[13px] text-white/60">{net === 0 ? "You're settled up." : "Opening balance imported from Splitwise. If it's wrong, you can dispute it after you join."}</p>
+        </div>
+        <div className="mt-8">
+          {user ? <AcceptClaim token={token} name={p.member_name ?? ""} /> : (
+            <div className="grid gap-3">
+              <ButtonLink href={`/signup?next=${encodeURIComponent(here)}`} size="lg" full>Create account to join</ButtonLink>
+              <ButtonLink href={`/login?next=${encodeURIComponent(here)}`} size="lg" variant="secondary" full>I have an account</ButtonLink>
+            </div>
+          )}
+        </div>
+        <p className="mt-6 text-[13px] text-muted">No bank account needed. Eqlshare never moves money. {net !== 0 && `Amount shown: ${formatUSD(Math.abs(net))}.`}</p>
+      </>
+    );
+  }
+  return (
+    <div className="min-h-dvh flex flex-col px-5 sm:px-10 py-6">
+      <Link href="/" aria-label="Eqlshare home"><Logo /></Link>
+      <main className="flex-1 grid place-items-center py-10"><div className="w-full max-w-[420px] rise">{body}</div></main>
+    </div>
+  );
+}
