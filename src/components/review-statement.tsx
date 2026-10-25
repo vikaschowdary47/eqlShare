@@ -8,6 +8,7 @@ import type { SplitMethod } from "@/lib/domain/split";
 import { CATEGORY_LABEL } from "./status";
 import { SplitEditor, SplitPreview, useSplit, type SplitMember } from "./split-editor";
 import { Button, Field, Input, Notice, Select } from "./ui";
+import { uuid } from "@/lib/uuid";
 
 export function ReviewStatement(props: {
   spaceId: string; statementId: string;
@@ -26,7 +27,7 @@ export function ReviewStatement(props: {
   const [error, setError] = useState<string | null>(null);
   const [confirmDismiss, setConfirmDismiss] = useState(false);
   const [pending, start] = useTransition();
-  const reqId = useRef(crypto.randomUUID());
+  const reqId = useRef(uuid());
   const cents = parseDollars(amount);
   const split = useSplit(props.members, cents, props.defaultMethod);
   const ready = !!title.trim() && !!cents && !!due && split.result?.ok;

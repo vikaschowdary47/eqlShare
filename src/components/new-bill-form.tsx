@@ -9,6 +9,7 @@ import type { SplitMethod } from "@/lib/domain/split";
 import { CATEGORY_LABEL } from "./status";
 import { SplitEditor, SplitPreview, useSplit, type SplitMember } from "./split-editor";
 import { Button, Field, Input, Notice, Select, cx } from "./ui";
+import { uuid } from "@/lib/uuid";
 
 export function NewBillForm(props: {
   spaceId: string; noun: string; defaultCategory: string; defaultMethod: SplitMethod; meId: string; isOwner: boolean; today: string; members: SplitMember[];
@@ -26,7 +27,7 @@ export function NewBillForm(props: {
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   // One id per form: retries and double clicks can never create two bills
-  const requestId = useRef(crypto.randomUUID());
+  const requestId = useRef(uuid());
 
   const cents = parseDollars(amount);
   const split = useSplit(props.members, cents, props.defaultMethod);

@@ -12,6 +12,7 @@ import { formatUSD, parseDollars, centsToInput } from "@/lib/domain/money";
 import { SPACE_PRESETS, SPACE_TYPES, type SpaceType } from "@/lib/domain/spaces";
 import { Button, Chip, Input, Logo, Notice, Select, Spinner, cx } from "@/components/ui";
 import { FilePicker, type PickedFile } from "@/components/upload/file-picker";
+import { uuid } from "@/lib/uuid";
 
 export interface OwnedSpace { id: string; name: string; members: { id: string; name: string; isMe: boolean }[] }
 type Step = "guide" | "pick" | "reading" | "review";
@@ -53,7 +54,7 @@ export function ImportFlow({ spaces, backHref }: { spaces: OwnedSpace[]; backHre
   const [groups, setGroups] = useState<ReviewGroup[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const reqId = useRef(crypto.randomUUID());
+  const reqId = useRef(uuid());
 
   async function read() {
     setError(null);

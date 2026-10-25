@@ -10,6 +10,7 @@ import { centsToInput, formatUSD, parseDollars } from "@/lib/domain/money";
 import { CATEGORY_LABEL } from "./status";
 import { Button, Field, Input, Notice, Select } from "./ui";
 import { CopyField } from "./copy-field";
+import { uuid } from "@/lib/uuid";
 
 function useAction() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export function MemberShareActions({ spaceId, splitId, reportableCents, payerFir
   const [amount, setAmount] = useState(centsToInput(reportableCents));
   const [method, setMethod] = useState("");
   const [note, setNote] = useState("");
-  const reqId = useRef(crypto.randomUUID());
+  const reqId = useRef(uuid());
   const a = useAction();
   const cents = parseDollars(amount);
 
