@@ -140,3 +140,43 @@ export function statementKey(e: Pick<Extraction, "provider" | "accountLast4" | "
   if (e.statementId) return [e.provider.value, e.accountLast4 ?? "", "id", e.statementId].join("|");
   return null;
 }
+
+export const VISION_PARSER_VERSION = "vision-1";
+const ISO = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Builds an Extraction from what a vision model read off a photo or screenshot of a bill.
+ * Same contract as the text parser: a field the model wasn't sure of is "ambiguous",
+ * so it goes to human review rather than being trusted.
+ */
+export function statementFromVision(raw: unknown): Extraction {
+  const o = (typeof raw === "object" && raw !== null ? raw : {}) as Record<string, unknown>;
+  const conf = (k: string) => (typeof o[`${k}_confidence`] === "number" ? (o[`${k}_confidence`] as number) : 0);
+  const str = (k: string, max = 80) => (typeof o[k] === "string" && (o[k] as string).trim() ? (o[k] as string).trim().slice(0, max) : null);
+  const date = (k: string) => { const v = str(k, 10); return v && ISO.test(v) && toISODate(v.replace(/^(\d{4})-(\d{2})-(\d{2})$/, "$2/$3/$1")) === v ? v : null; };
+  const field = <T,>(value: T | null, c: number) =>
+    value === null ? { value: null, status: "missing" as const } : c >= 0.7 ? { value, status: "found" as const } : { value: null, status: "ambiguous" as const };
+
+  const cents = typeof o.amount_due_cents === "number" && Number.isSafeInteger(o.amount_due_cents) && o.amount_due_cents >= 0 ? o.amount_due_cents : null;
+  const provider = field(str("provider"), conf("provider"));
+  const amountDueCents = field(cents, conf("amount_due"));
+  const dueDate = field(date("due_date"), conf("due_date"));
+  const reasons: string[] = ["Read from a photo. Check every field against the original."];
+  if (provider.status !== "found") reasons.push(provider.status === "ambiguous" ? "Provider name was hard to read" : "Provider not found");
+  if (amountDueCents.status !== "found") reasons.push(amountDueCents.status === "ambiguous" ? "Amount due was hard to read" : "Amount due not found");
+  if (dueDate.status !== "found") reasons.push(dueDate.status === "ambiguous" ? "Due date was hard to read" : "Due date not found");
+  if (cents !== null && cents >= LARGE_AMOUNT_CENTS) reasons.push("Amount is unusually large");
+  if (cents === 0) reasons.push("Amount due is $0.00");
+  const last4 = str("account_last4", 4);
+
+  return {
+    kind: o.is_bill === false ? "notice_only" : "statement",
+    provider, amountDueCents, dueDate,
+    periodStart: date("period_start"), periodEnd: date("period_end"),
+    accountLast4: last4 && /^\d{4}$/.test(last4) ? last4 : null,
+    statementId: str("statement_number", 40),
+    needsReview: true, // photos are always checked by a person
+    reasons,
+    parserVersion: VISION_PARSER_VERSION,
+  };
+}

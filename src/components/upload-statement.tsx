@@ -35,12 +35,12 @@ export function UploadStatement({ spaceId }: { spaceId: string }) {
         </div>
       ) : (
         <>
-          <FilePicker files={files} onChange={setFiles} onError={setError} kinds={["pdf"]} label="Statement" hint="PDF up to 10 MB." />
+          <FilePicker files={files} onChange={setFiles} onError={setError} kinds={["pdf", "image"]} camera label="Bill" hint="PDF, photo or screenshot, up to 10 MB." />
           {files.length > 0 && <Button className="mt-3" full onClick={send}>Read statement</Button>}
         </>
       )}
       {error && <div className="mt-3"><Notice tone="error" title={error} /></div>}
-      <p className="mt-3 text-[13px] text-muted">Nothing is shared until you check the details and confirm. The original file is stored privately and only members of this Space can open it.</p>
+      <p className="mt-3 text-[13px] text-muted">Nothing is shared until you check the details and confirm. PDFs are stored privately and only members of this Space can open them. Photos are read once and not stored.</p>
     </div>
   );
 }

@@ -15,7 +15,7 @@ function Row({ s, spaceId }: { s: Statement; spaceId: string }) {
   return (
     <Link href={`/s/${spaceId}/auto-bills/${s.id}`} className="flex items-center gap-4 px-4 sm:px-5 py-4 hover:bg-sunken/60">
       <span className="grid place-items-center size-10 rounded-[12px] bg-sunken ring-1 ring-line text-[12px] font-semibold text-ink-2 shrink-0" aria-hidden="true">
-        {s.source === "email" ? "@" : "PDF"}
+        {s.source === "email" ? "@" : s.parser_version?.startsWith("vision") ? "IMG" : "PDF"}
       </span>
       <div className="flex-1 min-w-0">
         <p className="text-[15px] font-medium truncate">{s.provider ?? "Unrecognized provider"}</p>
@@ -69,7 +69,7 @@ export default async function AutoBillsPage({ params }: { params: Promise<{ spac
           <section id="forwarding" aria-labelledby="fw" className="space-y-3 scroll-mt-24">
             <div className="flex items-center justify-between"><h2 id="fw" className="text-[17px] font-semibold tracking-[-0.01em]">Forward bill emails</h2>{forwardingLive ? <Chip tone="success">On</Chip> : <Chip>Coming soon</Chip>}</div>
             <Card className="p-5 space-y-4">
-              {!forwardingLive && <Notice tone="neutral" title="Forwarding isn't switched on yet">Your address is reserved for this Space. Until forwarding is on, upload the PDF instead.</Notice>}
+              {!forwardingLive && <Notice tone="neutral" title="Forwarding isn't switched on yet">Your address is reserved for this Space. Until forwarding is on, upload the PDF or a photo of the bill instead.</Notice>}
               <CopyField label="This Space's private address" value={address} mono />
               <ol className="space-y-2.5 text-[14px] text-ink-2 list-decimal pl-5 marker:text-muted">
                 <li>In your email, open a bill from your provider, for example ComEd.</li>

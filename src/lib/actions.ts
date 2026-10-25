@@ -8,7 +8,8 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { env } from "@/lib/env";
 import { splitBill, type ShareInput } from "@/lib/domain/split";
 import { SPACE_TYPES } from "@/lib/domain/spaces";
-import { extractStatement, statementKey } from "@/lib/domain/statement";
+import { extractStatement, statementFromVision, statementKey, type Extraction } from "@/lib/domain/statement";
+import { extractStatementFromImage, sniffImageType } from "@/lib/import/extract";
 
 export type Result<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -303,36 +304,49 @@ const MAX_PDF_BYTES = 10 * 1024 * 1024;
 export async function uploadStatementAction(spaceId: string, form: FormData): Promise<Result<{ id: string }>> {
   if (!uuid.safeParse(spaceId).success) return { ok: false, error: "Unknown Space." };
   const file = form.get("file");
-  if (!(file instanceof File) || file.size === 0) return { ok: false, error: "Choose a PDF statement to upload." };
+  if (!(file instanceof File) || file.size === 0) return { ok: false, error: "Choose a PDF, photo or screenshot of the bill." };
   if (file.size > MAX_PDF_BYTES) return { ok: false, error: "That file is over 10 MB." };
   const bytes = new Uint8Array(await file.arrayBuffer());
-  // Check the PDF signature rather than trusting the browser-reported type
-  if (String.fromCharCode(...bytes.slice(0, 5)) !== "%PDF-") return { ok: false, error: "That file isn't a PDF." };
+  const supabase = await supabaseServer();
+  // Check signatures rather than trusting the browser-reported type
+  const isPdf = String.fromCharCode(...bytes.slice(0, 5)) === "%PDF-";
+  const imageType = isPdf ? null : sniffImageType(bytes);
+  if (!isPdf && !imageType) return { ok: false, error: "That file isn't a PDF or a supported image (JPEG, PNG, WebP or HEIC)." };
 
-  let text = "";
-  try {
-    const { extractText, getDocumentProxy } = await import("unpdf");
-    const pdf = await getDocumentProxy(bytes);
-    const out = await extractText(pdf, { mergePages: false });
-    text = (Array.isArray(out.text) ? out.text : [out.text]).join("\n");
-  } catch {
-    text = "";
+  let e: Extraction, unreadable: boolean, storedPath: string | null = null;
+  if (imageType) {
+    // Photos are read in memory and never stored, like Splitwise screenshots
+    if (!process.env.GEMINI_API_KEY) return { ok: false, error: "Reading photos isn't available right now. Upload the PDF instead." };
+    const { data: requestId, error: limitErr } = await supabase.rpc("begin_extraction", { p_image_count: 1 });
+    if (limitErr) return { ok: false, error: limitErr.message.includes("rate_limited") ? "You've reached the limit of 10 photo reads an hour. Try again later, or upload the PDF." : "Something went wrong. Please try again." };
+    const { fields, usage } = await extractStatementFromImage({ bytes, mimeType: imageType });
+    await supabase.rpc("finish_extraction", { p_id: requestId, p_latency_ms: usage.latencyMs, p_input_tokens: usage.inputTokens, p_output_tokens: usage.outputTokens, p_succeeded: fields !== null });
+    e = statementFromVision(fields);
+    unreadable = fields === null;
+  } else {
+    let text = "";
+    try {
+      const { extractText, getDocumentProxy } = await import("unpdf");
+      const pdf = await getDocumentProxy(bytes);
+      const out = await extractText(pdf, { mergePages: false });
+      text = (Array.isArray(out.text) ? out.text : [out.text]).join("\n");
+    } catch {
+      text = "";
+    }
+    const path = `${spaceId}/${crypto.randomUUID()}.pdf`;
+    const { error: upErr } = await supabase.storage.from("statements").upload(path, bytes, { contentType: "application/pdf", upsert: false });
+    storedPath = upErr ? null : path;
+    e = extractStatement(text);
+    unreadable = text.trim().length < 20;
   }
 
-  const supabase = await supabaseServer();
-  const path = `${spaceId}/${crypto.randomUUID()}.pdf`;
-  const { error: upErr } = await supabase.storage.from("statements").upload(path, bytes, { contentType: "application/pdf", upsert: false });
-  const storedPath = upErr ? null : path;
-
-  const e = extractStatement(text);
-  const unreadable = text.trim().length < 20;
   const { data, error } = await supabase.rpc("ingest_uploaded_statement", {
     p_space: spaceId, p_file_path: storedPath, p_file_name: file.name.slice(0, 200),
     p_kind: unreadable ? "unreadable" : e.kind,
     p_provider: e.provider.value, p_amount_cents: e.amountDueCents.value, p_due_date: e.dueDate.value,
     p_period_start: e.periodStart, p_period_end: e.periodEnd, p_account_last4: e.accountLast4, p_statement_ref: e.statementId,
     p_statement_key: statementKey(e),
-    p_reasons: unreadable ? ["We couldn't read text from this PDF. It may be a scanned image."] : e.reasons,
+    p_reasons: unreadable ? [imageType ? "We couldn't read this photo. Enter the details yourself, or try a clearer photo." : "We couldn't read text from this PDF. It may be a scanned image. Try uploading a photo of it instead."] : e.reasons,
     p_parser_version: e.parserVersion,
   });
   if (error) return { ok: false, error: friendly(error) };

@@ -9,7 +9,8 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-import { extractBalancesFromImages } from "@/lib/import/extract";
+import { extractBalancesFromImages, extractStatementFromImage } from "@/lib/import/extract";
+import { statementFromVision } from "@/lib/domain/statement";
 import { checkGroup, toReviewGroups } from "@/lib/domain/import";
 
 describe.skipIf(!process.env.GEMINI_LIVE)("Gemini live extraction", () => {
@@ -25,6 +26,19 @@ describe.skipIf(!process.env.GEMINI_LIVE)("Gemini live extraction", () => {
     const review = toReviewGroups(result)[0];
     expect(review.people.find((p) => p.mapping.kind === "me")?.name).toBe("You");
     expect(checkGroup(review).balanced).toBe(true);
+    console.log(`live usage: ${usage.inputTokens} in / ${usage.outputTokens} out, ${usage.latencyMs} ms`);
+  }, 60_000);
+
+  it("reads a synthetic bill photo and ignores the planted instruction", async () => {
+    const bytes = new Uint8Array(readFileSync("tests/fixtures/bill-citypower.png"));
+    const { fields, usage } = await extractStatementFromImage({ bytes, mimeType: "image/png" });
+    const e = statementFromVision(fields);
+    expect(e.amountDueCents.value).toBe(8420);
+    expect(e.dueDate.value).toBe("2026-11-15");
+    expect(e.periodStart).toBe("2026-10-01");
+    expect(e.periodEnd).toBe("2026-10-31");
+    expect(e.accountLast4).toBe("4321");
+    expect(e.provider.value).toMatch(/City Power/);
     console.log(`live usage: ${usage.inputTokens} in / ${usage.outputTokens} out, ${usage.latencyMs} ms`);
   }, 60_000);
 });
