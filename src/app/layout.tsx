@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
+import { APP_NAME } from "@/lib/brand";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
@@ -8,8 +9,8 @@ const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", variable: "-
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  title: { default: "Eqlshare · Shared bills, organized", template: "%s · Eqlshare" },
-  description: "Eqlshare collects shared bills, splits them to the cent, and shows everyone what is due. No bank account required.",
+  title: { default: `${APP_NAME} · Shared bills, organized`, template: `%s · ${APP_NAME}` },
+  description: `${APP_NAME} collects shared bills, splits them to the cent, and shows everyone what is due. No bank account required.`,
 };
 
 export const viewport: Viewport = {

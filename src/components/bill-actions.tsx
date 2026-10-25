@@ -11,6 +11,7 @@ import { CATEGORY_LABEL } from "./status";
 import { Button, Field, Input, Notice, Select } from "./ui";
 import { CopyField } from "./copy-field";
 import { uuid } from "@/lib/uuid";
+import { APP_NAME } from "@/lib/brand";
 
 function useAction() {
   const router = useRouter();
@@ -30,7 +31,7 @@ function useAction() {
 
 const textarea = "block w-full rounded-[12px] bg-surface p-3 text-[15px] ring-1 ring-inset ring-line-strong focus:outline-none focus:ring-2 focus:ring-brand-strong";
 
-/** For the member who owes: record a payment made outside Eqlshare, or dispute the share. */
+/** For the member who owes: record a payment made outside the app, or dispute the share. */
 export function MemberShareActions({ spaceId, splitId, reportableCents, payerFirst, disputed }: { spaceId: string; splitId: string; reportableCents: number; payerFirst: string; disputed: boolean }) {
   const [mode, setMode] = useState<"none" | "pay" | "dispute">("none");
   const [amount, setAmount] = useState(centsToInput(reportableCents));
@@ -104,7 +105,7 @@ export function ConfirmSettlement({ spaceId, settlementId, amountCents, from }: 
 export function RemindButton({ spaceId, splitId, message, link }: { spaceId: string; splitId: string; message: string; link: string }) {
   const a = useAction();
   const [sent, setSent] = useState(false);
-  if (sent) return <div className="mt-3"><CopyField label="Reminder ready to send" value={`${message} ${link}`} shareText="Eqlshare reminder" /></div>;
+  if (sent) return <div className="mt-3"><CopyField label="Reminder ready to send" value={`${message} ${link}`} shareText={`${APP_NAME} reminder`} /></div>;
   return (
     <div className="mt-2">
       <Button size="sm" variant="secondary" loading={a.pending} onClick={() => a.run(() => sendReminderAction(spaceId, splitId), () => setSent(true))}>Send reminder</Button>
@@ -124,7 +125,7 @@ export function UtilityPaid({ spaceId, billId }: { spaceId: string; billId: stri
   if (!ask) return <Button size="sm" variant="secondary" onClick={() => setAsk(true)}>I paid the provider</Button>;
   return (
     <div className="space-y-2">
-      <p className="text-[13px] text-ink-2">This tells the Space you paid the provider. Eqlshare can't see provider payments, so it shows as unverified.</p>
+      <p className="text-[13px] text-ink-2">This tells the Space you paid the provider. {APP_NAME} can't see provider payments, so it shows as unverified.</p>
       <div className="flex gap-2"><Button size="sm" variant="ghost" onClick={() => setAsk(false)}>Cancel</Button><Button size="sm" loading={a.pending} onClick={() => a.run(() => reportUtilityPaidAction(spaceId, billId))}>Yes, I paid it</Button></div>
       {a.error && <p className="text-[13px] text-error">{a.error}</p>}
     </div>

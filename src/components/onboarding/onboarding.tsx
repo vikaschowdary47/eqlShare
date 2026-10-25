@@ -7,6 +7,7 @@ import { createInviteAction, createSpaceAction } from "@/lib/actions";
 import { SPACE_PRESETS, SPACE_TYPES, type SpaceType } from "@/lib/domain/spaces";
 import { Button, ButtonLink, Field, Input, Logo, Notice, cx } from "@/components/ui";
 import { CopyField } from "@/components/copy-field";
+import { APP_DOMAIN, APP_NAME } from "@/lib/brand";
 
 type Step = "type" | "join" | "name" | "invite" | "first";
 
@@ -71,7 +72,7 @@ export function Onboarding({ firstName, hasSpaces }: { firstName: string; hasSpa
 
           {step === "type" && (
             <section className="rise" aria-labelledby="t">
-              <p className="text-[12px] font-medium tracking-[0.16em] text-brand-ink">EQLSHARE · GET STARTED</p>
+              <p className="text-[12px] font-medium tracking-[0.16em] text-brand-ink">{APP_NAME} · GET STARTED</p>
               <h1 id="t" className="mt-3 text-[clamp(32px,6vw,44px)] font-semibold tracking-[-0.04em] leading-[1.05]">What are you sharing?</h1>
               <p className="mt-3 text-[17px] text-muted">Choose a Space type. You can customize it later.</p>
               <div role="radiogroup" aria-labelledby="t" className="mt-8 grid gap-3">
@@ -118,7 +119,7 @@ export function Onboarding({ firstName, hasSpaces }: { firstName: string; hasSpa
             <form onSubmit={join} className="rise">
               <h1 className="text-[clamp(30px,6vw,40px)] font-semibold tracking-[-0.04em] leading-tight">Join an existing Space</h1>
               <p className="mt-3 text-[17px] text-muted">Paste the invite link someone sent you. You'll see the Space name before you join.</p>
-              <div className="mt-8"><Field label="Invite link" htmlFor="link"><Input id="link" value={joinLink} onChange={(e) => setJoinLink(e.target.value)} placeholder="https://eqlshare.com/join/…" autoFocus /></Field></div>
+              <div className="mt-8"><Field label="Invite link" htmlFor="link"><Input id="link" value={joinLink} onChange={(e) => setJoinLink(e.target.value)} placeholder={`https://${APP_DOMAIN}/join/…`} autoFocus /></Field></div>
               <div className="mt-8 flex gap-3">
                 <Button type="button" variant="secondary" size="lg" onClick={() => { setError(null); setStep("type"); }}>Back</Button>
                 <Button type="submit" size="lg" className="flex-1">Preview invite</Button>
@@ -154,7 +155,7 @@ export function Onboarding({ firstName, hasSpaces }: { firstName: string; hasSpa
               <h1 className="text-[clamp(30px,6vw,40px)] font-semibold tracking-[-0.04em] leading-tight">Invite people</h1>
               <p className="mt-3 text-[17px] text-muted">Anyone with this link can ask to join <strong className="text-ink">{name.trim()}</strong>. It expires in 7 days and you can revoke it anytime from Space settings.</p>
               <div className="mt-8">
-                {invite ? <CopyField value={invite} label="Invite link" shareText={`Join ${name.trim()} on Eqlshare`} /> : <Notice tone="warning" title="We couldn't create an invite link">You can create one later from Space settings.</Notice>}
+                {invite ? <CopyField value={invite} label="Invite link" shareText={`Join ${name.trim()} on ${APP_NAME}`} /> : <Notice tone="warning" title="We couldn't create an invite link">You can create one later from Space settings.</Notice>}
               </div>
               <div className="mt-8 flex gap-3">
                 <Button variant="secondary" size="lg" onClick={() => setStep("first")}>Skip for now</Button>

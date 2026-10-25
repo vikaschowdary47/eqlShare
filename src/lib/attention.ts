@@ -2,6 +2,7 @@ import type { BillView, Statement } from "./data";
 import { missingStatements } from "./data-pure";
 import { formatUSD } from "./domain/money";
 import { formatDate } from "./domain/due";
+import { APP_NAME } from "./brand";
 
 export interface AttentionItem {
   key: string;
@@ -33,7 +34,7 @@ export function buildAttention(spaceId: string, bills: BillView[], statements: S
       if (b.overall === "overdue")
         out.push({ key: `odp-${b.id}`, tone: "error", title: `${b.title}: ${formatUSD(b.outstandingCents)} still owed to you`, detail: `It was due ${formatDate(b.due_date)}. You can send a reminder.`, href: bill(b), cta: "Remind" });
       if (b.utility_status === "unpaid" && b.due_date && b.due_date < today)
-        out.push({ key: `util-${b.id}`, tone: "warning", title: `Did you pay the provider for ${b.title}?`, detail: "Eqlshare can't see provider payments. Mark it when you've paid so the Space knows.", href: bill(b), cta: "Update" });
+        out.push({ key: `util-${b.id}`, tone: "warning", title: `Did you pay the provider for ${b.title}?`, detail: `${APP_NAME} can't see provider payments. Mark it when you've paid so the Space knows.`, href: bill(b), cta: "Update" });
     }
   }
 

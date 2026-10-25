@@ -5,6 +5,7 @@ import { signOutAction } from "@/lib/actions";
 import { AddMenu, SideNav, SpaceSwitcher, TabBar } from "@/components/shell/nav";
 import { Avatar, ButtonLink, Logo, Notice } from "@/components/ui";
 import { RememberSpace } from "@/components/shell/remember";
+import { APP_NAME } from "@/lib/brand";
 
 export default async function SpaceLayout({ children, params }: { children: React.ReactNode; params: Promise<{ spaceId: string }> }) {
   const { spaceId } = await params;
@@ -38,7 +39,7 @@ export default async function SpaceLayout({ children, params }: { children: Reac
 
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col gap-6 sticky top-0 h-dvh px-4 py-5 border-r border-line bg-ground">
-        <Link href="/home" className="px-2" aria-label="Eqlshare home"><Logo /></Link>
+        <Link href="/home" className="px-2" aria-label={`${APP_NAME} home`}><Logo /></Link>
         <div className="px-2"><SpaceSwitcher current={current} spaces={list} /></div>
         {!readOnly && <AddMenu spaceId={spaceId} />}
         <SideNav spaceId={spaceId} />

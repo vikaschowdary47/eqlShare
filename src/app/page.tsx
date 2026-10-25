@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getUser } from "@/lib/data";
 import { ButtonLink, Logo, Money, ShareBar } from "@/components/ui";
+import { APP_NAME, SUPPORT_EMAIL } from "@/lib/brand";
 
 const TYPES = [
   ["Shared Home", "Roommates, students, shared apartments"],
@@ -10,10 +11,10 @@ const TYPES = [
 ];
 
 const FAQ = [
-  ["Do I need to connect a bank account?", "No. Eqlshare never asks for bank details and never moves money. You pay each other the way you already do, and Eqlshare keeps the record everyone agrees on."],
+  ["Do I need to connect a bank account?", `No. ${APP_NAME} never asks for bank details and never moves money. You pay each other the way you already do, and ${APP_NAME} keeps the record everyone agrees on.`],
   ["How does it read my bills?", "Upload the PDF statement. We find the provider, amount due, due date and billing period. If anything is missing or unclear, we ask you instead of guessing. Nothing is shared until a person confirms it."],
   ["What about the extra cent?", "$100.00 split three ways is $33.34, $33.33 and $33.33. The extra cent always goes to the same person, so the shares add up to the total every time."],
-  ["Can I keep using Splitwise or Venmo?", "Yes. Eqlshare tracks who owes what. You can keep paying through whatever app you use now."],
+  ["Can I keep using Splitwise or Venmo?", `Yes. ${APP_NAME} tracks who owes what. You can keep paying through whatever app you use now.`],
   ["Is it free?", "Shared expenses, splitting and reminders are free during the beta. We haven't set pricing for automated bills yet."],
 ];
 
@@ -23,7 +24,7 @@ export default async function Landing() {
     <div className="overflow-x-clip">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-ink focus:text-white focus:px-4 focus:py-2 focus:rounded-lg">Skip to content</a>
       <header className="mx-auto max-w-[1200px] px-5 sm:px-8 h-20 flex items-center justify-between">
-        <Link href="/" aria-label="Eqlshare home"><Logo /></Link>
+        <Link href="/" aria-label={`${APP_NAME} home`}><Logo /></Link>
         <nav aria-label="Primary" className="hidden md:flex gap-8 text-[15px] text-ink-2">
           <a href="#how" className="hover:text-ink">How it works</a>
           <a href="#spaces" className="hover:text-ink">Spaces</a>
@@ -48,7 +49,7 @@ export default async function Landing() {
               Shared bills,<br /><span className="figure font-normal italic tracking-[-0.03em] text-brand-strong">organized</span> automatically.
             </h1>
             <p className="mt-6 text-[clamp(17px,1.6vw,20px)] text-ink-2 max-w-[34ch] leading-relaxed">
-              Eqlshare reads the bill, splits it to the cent, and shows everyone what's due before it's late. No bank account needed.
+              {APP_NAME} reads the bill, splits it to the cent, and shows everyone what's due before it's late. No bank account needed.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <ButtonLink href="/signup" size="lg">Create your Space</ButtonLink>
@@ -91,7 +92,7 @@ export default async function Landing() {
           <div className="mx-auto max-w-[1200px] px-5 sm:px-8 py-24 grid lg:grid-cols-[1fr_1.4fr] gap-14">
             <div>
               <h2 className="text-[clamp(32px,4.5vw,54px)] font-semibold tracking-[-0.045em] leading-[1]">From inbox to <span className="figure italic font-normal text-brand-strong">everyone knows</span>.</h2>
-              <p className="mt-5 text-[17px] text-ink-2 max-w-[38ch]">The bill usually lands in one person's email. Eqlshare makes it the whole household's information.</p>
+              <p className="mt-5 text-[17px] text-ink-2 max-w-[38ch]">The bill usually lands in one person's email. {APP_NAME} makes it the whole household's information.</p>
             </div>
             <ol className="relative border-l border-line-strong ml-3 space-y-12">
               {[
@@ -165,9 +166,9 @@ export default async function Landing() {
 
       <footer className="border-t border-line">
         <div className="mx-auto max-w-[1200px] px-5 sm:px-8 py-10 flex flex-wrap items-center justify-between gap-4 text-[14px] text-muted">
-          <Logo className="!text-[16px]" />
-          <nav aria-label="Legal" className="flex gap-6"><Link href="/privacy" className="hover:text-ink">Privacy</Link><Link href="/terms" className="hover:text-ink">Terms</Link><a href="mailto:support@eqlshare.com" className="hover:text-ink">Support</a></nav>
-          <p>© 2026 Eqlshare</p>
+          <Logo height={24} />
+          <nav aria-label="Legal" className="flex gap-6"><Link href="/privacy" className="hover:text-ink">Privacy</Link><Link href="/terms" className="hover:text-ink">Terms</Link><a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-ink">Support</a></nav>
+          <p>© 2026 {APP_NAME}</p>
         </div>
       </footer>
     </div>

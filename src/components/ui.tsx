@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { APP_NAME, APP_SLUG } from "@/lib/brand";
 import type { ComponentProps, ReactNode } from "react";
 import { formatUSD } from "@/lib/domain/money";
 
@@ -7,30 +8,21 @@ export function cx(...c: (string | false | null | undefined)[]) {
 }
 
 /* ---------- brand ---------- */
-export function Logo({ className, tone = "ink" }: { className?: string; tone?: "ink" | "light" }) {
-  const c = tone === "light" ? "#ffffff" : "var(--ink)";
+/**
+ * The eqlTab lockup (icon + wordmark) from brand/: the light lockup normally, the dark lockup
+ * when the app is in dark mode (data-theme="dark" on <html>) or when tone="light" puts it on a dark surface.
+ */
+export function Logo({ className, tone = "ink", height = 28 }: { className?: string; tone?: "ink" | "light"; height?: number }) {
+  const width = Math.round((height * 467) / 120);
+  const img = (v: "light" | "dark", cls?: string) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={`/brand/${APP_SLUG}-lockup-${v}.svg`} alt={APP_NAME} width={width} height={height} className={cx("block", cls)} />
+  );
   return (
-    <span className={cx("inline-flex items-center gap-2.5 font-semibold tracking-[-0.03em] text-[19px]", className)} style={{ color: c }}>
-      <LogoMark size={26} />
-      eqlshare
+    <span className={cx("inline-flex items-center", className)}>
+      {tone === "light" ? img("dark") : <>{img("light", "logo-light")}{img("dark", "logo-dark")}</>}
     </span>
   );
-}
-
-/**
- * The app icon with rounded corners for in-app use: brand/eqlshare-icon.svg, or
- * brand/eqlshare-icon-dark.svg when the app is in dark mode (data-theme="dark" on <html>).
- */
-export function LogoMark({ size = 26, className }: { size?: number; className?: string }) {
-  const mark = (bg: string, fg: string, variant: string) => (
-    <svg width={size} height={size} viewBox="0 0 1024 1024" aria-hidden="true" className={cx("shrink-0", variant, className)}>
-      <rect width="1024" height="1024" rx="232" fill={bg} />
-      <circle cx="512" cy="512" r="347" fill={fg} />
-      <rect x="126" y="362" width="772" height="95" fill={bg} />
-      <rect x="126" y="567" width="772" height="95" fill={bg} />
-    </svg>
-  );
-  return <>{mark("var(--brand)", "#ffffff", "logo-light")}{mark("var(--brand-dark-bg)", "var(--brand)", "logo-dark")}</>;
 }
 
 /* ---------- buttons ---------- */

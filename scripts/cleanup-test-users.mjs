@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 /**
- * Deletes e2e test users (@eqlshare-test.dev only) and everything they created:
+ * Deletes e2e test users (@eqltab-test.dev only) and everything they created:
  * their Spaces (with bills, members, statements, activity), stored statement files,
  * imported people and their claim links, and import batches.
  * Reads NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY from web/.env. Never prints keys.
  *
- *   node scripts/cleanup-test-users.mjs --all              every @eqlshare-test.dev user
- *   node scripts/cleanup-test-users.mjs a@eqlshare-test.dev b@eqlshare-test.dev
+ *   node scripts/cleanup-test-users.mjs --all              every @eqltab-test.dev user
+ *   node scripts/cleanup-test-users.mjs a@eqltab-test.dev b@eqltab-test.dev
  */
 import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 
-const TEST_DOMAIN = "@eqlshare-test.dev";
+const TEST_DOMAIN = "@eqltab-test.dev";
 
 try {
   process.loadEnvFile(fileURLToPath(new URL("../.env", import.meta.url)));

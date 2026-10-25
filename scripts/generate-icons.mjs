@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 /**
  * Regenerates every app icon from the sources in brand/ (copies of the files in the project root):
- *   eqlshare-icon.svg       default, 1024x1024 full-bleed square
- *   eqlshare-icon-dark.svg  dark appearance (drawn in-app by LogoMark in ui.tsx; no web file needs it)
- *   eqlshare-icon-mono.svg  single-colour silhouette on transparent (themed / monochrome uses)
- *   eqlshare-favicon.svg    32x32, tuned for small sizes; all favicons come from this, not the 1024 icon
+ *   eqltab-icon.svg           default, 1024x1024 full-bleed square
+ *   eqltab-icon-dark.svg      dark appearance (its colours drive the favicon's dark mode)
+ *   eqltab-icon-mono.svg      single-colour silhouette on transparent (themed / monochrome uses)
+ *   eqltab-favicon.svg        32x32, tuned for small sizes; all favicons come from this, not the 1024 icon
+ *   eqltab-lockup-light.svg   icon + wordmark for light backgrounds (header, sign-in)
+ *   eqltab-lockup-dark.svg    icon + wordmark for dark backgrounds / dark mode
  * Run: npm run icons
  *
  * Writes (Next.js file conventions, so no <link> tags are needed):
@@ -15,6 +17,8 @@
  *   public/icons/icon-192.png, icon-512.png       PWA, default icon
  *   public/icons/icon-maskable-512.png            PWA maskable (the mark is inside the 80% safe zone)
  *   public/icons/icon-monochrome-512.png          PWA monochrome, from the mono icon
+ *   src/app/opengraph-image.png       1200x630 link preview: the default icon on the brand colour
+ *   public/brand/<prefix>-lockup-light.svg, -dark.svg   served for the in-app logo
  *
  * This is a web-only app: there are no iOS, Android or desktop targets to write.
  */
@@ -24,7 +28,7 @@ import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const PREFIX = "eqlshare";
+const PREFIX = "eqltab"; // lowercase app name; keep in sync with APP_SLUG in src/lib/brand.ts
 const src = async (name) => readFile(join(root, `brand/${PREFIX}-${name}.svg`));
 const [icon, dark, mono, favicon] = await Promise.all([src("icon"), src("icon-dark"), src("icon-mono"), src("favicon")]);
 
@@ -82,3 +86,9 @@ await out("public/icons/icon-192.png", await png(icon, 192));
 await out("public/icons/icon-512.png", await png(icon, 512));
 await out("public/icons/icon-maskable-512.png", await png(icon, 512));
 await out("public/icons/icon-monochrome-512.png", await png(mono, 512));
+
+// Open Graph: the icon at 360px, centred on a canvas of the icon's own background colour
+const brandBg = icon.toString().match(/<rect[^>]*fill="(#[0-9a-f]{6})"/i)[1];
+await out("src/app/opengraph-image.png", await sharp({ create: { width: 1200, height: 630, channels: 4, background: brandBg } })
+  .composite([{ input: await png(icon, 360), gravity: "centre" }]).png({ compressionLevel: 9 }).toBuffer());
+for (const v of ["light", "dark"]) await out(`public/brand/${PREFIX}-lockup-${v}.svg`, await src(`lockup-${v}`));

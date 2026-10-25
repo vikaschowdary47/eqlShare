@@ -3,6 +3,7 @@ import type { ActivityItem, Member } from "@/lib/data";
 import { formatUSD } from "@/lib/domain/money";
 import { SPACE_PRESETS, type SpaceType } from "@/lib/domain/spaces";
 import { Avatar } from "./ui";
+import { APP_NAME } from "@/lib/brand";
 
 function describe(a: ActivityItem, who: string): string {
   const m = a.metadata as Record<string, string | number | boolean | null>;
@@ -53,7 +54,7 @@ export function ActivityList({ items, members, meUserId, spaceId }: { items: Act
   return (
     <ol className="divide-y divide-line">
       {items.map((a) => {
-        const who = a.actor_user_id === meUserId ? "You" : a.actor_user_id ? names.get(a.actor_user_id) ?? "Someone" : "Eqlshare";
+        const who = a.actor_user_id === meUserId ? "You" : a.actor_user_id ? names.get(a.actor_user_id) ?? "Someone" : APP_NAME;
         const billId = a.entity_type === "bill" ? a.entity_id : (a.metadata.bill_id as string | undefined);
         const href = billId ? `/s/${spaceId}/bills/${billId}` : a.entity_type === "statement" && a.entity_id ? `/s/${spaceId}/auto-bills/${a.entity_id}` : null;
         const body = (

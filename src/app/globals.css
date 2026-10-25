@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 /*
-  Eqlshare design tokens. Light-first fintech: porcelain ground, ink text,
+  eqlTab design tokens. Light-first fintech: porcelain ground, ink text,
   one brand coral, serif figures for money, Geist for everything else.
 */
 :root {
   --ground: #f8fafc;
   --surface: #ffffff;
   --sunken: #f1f4f6;
-  --ink: #0b1a18;
+  --ink: #2B2210;          /* brand text colour: 15:1 on the page, 5.25:1 on coral */
   --ink-2: #33433f;
   --muted: #5d6b68;
   --line: #e3e8ec;
@@ -19,7 +19,7 @@
   --brand-strong: #E85A4A; /* toggles, focus rings, underlines, large headline words (3:1+) */
   --brand-ink: #B83A2B;    /* brand-coloured text on light backgrounds (5.71:1 on white) */
   --brand-wash: #FDEDEA;   /* tinted backgrounds; brand-ink on it is 5.02:1 */
-  --brand-dark-bg: #1F2937; /* dark icon background; also theme-color in dark mode (layout.tsx) */
+  --brand-dark-bg: #1F2937; /* dark-mode background: dark icon, theme-color in dark mode (layout.tsx) */
   --success: #15803d;
   --success-wash: #e8f5ec;
   --warning: #b45309;
@@ -72,7 +72,7 @@ body {
 .figure { font-family: var(--font-figure); font-weight: 400; letter-spacing: -0.02em; font-variant-numeric: lining-nums; line-height: 1; }
 .num { font-variant-numeric: tabular-nums; }
 
-/* Logo variants: the dark icon shows only when the app is in dark mode */
+/* Logo variants: the dark lockup shows when the app is in dark mode */
 .logo-dark { display: none; }
 :root[data-theme="dark"] .logo-light { display: none; }
 :root[data-theme="dark"] .logo-dark { display: inline; }

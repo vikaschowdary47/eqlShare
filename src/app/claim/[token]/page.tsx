@@ -7,6 +7,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { formatUSD } from "@/lib/domain/money";
 import { ButtonLink, EqualsArt, Logo, Money } from "@/components/ui";
 import { AcceptClaim } from "@/components/accept-claim";
+import { APP_NAME } from "@/lib/brand";
 
 export const metadata: Metadata = { title: "Join your Space", robots: { index: false } };
 
@@ -39,7 +40,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ token: s
         <EqualsArt />
         <h1 className="mt-6 text-[30px] font-semibold tracking-[-0.035em] leading-tight">This invite link doesn't work</h1>
         <p className="text-muted mt-3">It may have expired, been used already, or been replaced by a newer link. Ask the person who invited you to send a new one.</p>
-        <ButtonLink href={user ? "/home" : "/"} variant="secondary" size="lg" className="mt-8">{user ? "Go to my Spaces" : "Go to Eqlshare"}</ButtonLink>
+        <ButtonLink href={user ? "/home" : "/"} variant="secondary" size="lg" className="mt-8">{user ? "Go to my Spaces" : `Go to ${APP_NAME}`}</ButtonLink>
       </>
     );
   } else {
@@ -49,7 +50,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ token: s
     body = (
       <>
         <p className="text-[13px] font-medium text-brand-ink tracking-[0.14em] uppercase">You're invited</p>
-        <h1 className="mt-2 text-[34px] font-semibold tracking-[-0.04em] leading-[1.05]">{inviter} invited you to Eqlshare</h1>
+        <h1 className="mt-2 text-[34px] font-semibold tracking-[-0.04em] leading-[1.05]">{inviter} invited you to {APP_NAME}</h1>
         <p className="text-muted mt-3">Your balances with {inviter} were brought over from Splitwise as <strong className="text-ink font-medium">{p.person_name}</strong>.</p>
         <div className="mt-6 rounded-[20px] bg-night text-white p-6 grain relative overflow-hidden">
           <p className="text-[14px] text-white/65">{total < 0 ? `You owe ${inviter}` : total > 0 ? `${inviter} owes you` : "Your balance"}</p>
@@ -69,13 +70,13 @@ export default async function ClaimPage({ params }: { params: Promise<{ token: s
             </div>
           )}
         </div>
-        <p className="mt-6 text-[13px] text-muted">No bank account needed. Eqlshare never moves money. This link works once.</p>
+        <p className="mt-6 text-[13px] text-muted">No bank account needed. {APP_NAME} never moves money. This link works once.</p>
       </>
     );
   }
   return (
     <div className="min-h-dvh flex flex-col px-5 sm:px-10 py-6">
-      <Link href="/" aria-label="Eqlshare home"><Logo /></Link>
+      <Link href="/" aria-label={`${APP_NAME} home`}><Logo /></Link>
       <main className="flex-1 grid place-items-center py-10"><div className="w-full max-w-[420px] rise">{body}</div></main>
     </div>
   );

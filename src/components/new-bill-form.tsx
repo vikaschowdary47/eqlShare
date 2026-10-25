@@ -10,6 +10,7 @@ import { CATEGORY_LABEL } from "./status";
 import { SplitEditor, SplitPreview, useSplit, type SplitMember } from "./split-editor";
 import { Button, Field, Input, Notice, Select, cx } from "./ui";
 import { uuid } from "@/lib/uuid";
+import { APP_NAME } from "@/lib/brand";
 
 export function NewBillForm(props: {
   spaceId: string; noun: string; defaultCategory: string; defaultMethod: SplitMethod; meId: string; isOwner: boolean; today: string; members: SplitMember[];
@@ -131,7 +132,7 @@ export function NewBillForm(props: {
                   <div key={k} className="flex justify-between gap-4 px-5 py-3.5 text-[15px]"><dt className="text-muted">{k}</dt><dd className="font-medium text-right truncate">{v}</dd></div>
                 ))}
               </dl>
-              <p className="text-[14px] text-muted">When you save, everyone in this split can see the bill and their share. Eqlshare doesn't move money. People pay {payerName?.isMe ? "you" : payerName?.name.split(" ")[0]} however you usually do.</p>
+              <p className="text-[14px] text-muted">When you save, everyone in this split can see the bill and their share. {APP_NAME} doesn't move money. People pay {payerName?.isMe ? "you" : payerName?.name.split(" ")[0]} however you usually do.</p>
             </div>
           )}
 

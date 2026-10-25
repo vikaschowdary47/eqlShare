@@ -1,4 +1,5 @@
 import { getBills, getSpaceContext } from "@/lib/data";
+import { APP_SLUG } from "@/lib/brand";
 
 /** Prevent spreadsheet formula injection, then CSV-quote. */
 function cell(v: unknown): string {
@@ -21,6 +22,6 @@ export async function GET(_: Request, { params }: { params: Promise<{ spaceId: s
   const csv = rows.map((r) => r.map(cell).join(",")).join("\r\n");
   const name = ctx.space.name.replace(/[^\w-]+/g, "-").toLowerCase();
   return new Response(csv, {
-    headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="eqlshare-${name}-${new Date().toISOString().slice(0, 10)}.csv"`, "Cache-Control": "no-store" },
+    headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="${APP_SLUG}-${name}-${new Date().toISOString().slice(0, 10)}.csv"`, "Cache-Control": "no-store" },
   });
 }

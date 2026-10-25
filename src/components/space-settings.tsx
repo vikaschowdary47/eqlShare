@@ -9,6 +9,7 @@ import { AddPersonForm, PersonInvite } from "./invite/person-invite";
 import { SPACE_PRESETS, SPACE_TYPES, type SpaceType } from "@/lib/domain/spaces";
 import { Avatar, Button, Chip, Field, Input, Notice, Select, cx } from "./ui";
 import { CopyField } from "./copy-field";
+import { APP_NAME } from "@/lib/brand";
 
 function useRun() {
   const router = useRouter();
@@ -174,7 +175,7 @@ export function Invites({ spaceId, spaceName, invites }: { spaceId: string; spac
   return (
     <div className="space-y-4">
       {r.error && <Notice tone="error" title={r.error} />}
-      {link ? <CopyField label="New invite link" value={link} shareText={`Join ${spaceName} on Eqlshare`} />
+      {link ? <CopyField label="New invite link" value={link} shareText={`Join ${spaceName} on ${APP_NAME}`} />
         : <Button variant="secondary" loading={r.pending} onClick={() => r.run(() => createInviteAction(spaceId), undefined, (res) => res.ok && setLink((res.data as { url: string }).url))}>Create invite link</Button>}
       <p className="text-[13px] text-muted">Links expire after 7 days and work for up to 10 people. For security we only show a link once. Create a new one anytime.</p>
       {invites.length > 0 && (

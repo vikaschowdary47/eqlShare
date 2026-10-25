@@ -5,6 +5,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { SPACE_PRESETS, type SpaceType } from "@/lib/domain/spaces";
 import { ButtonLink, Logo, EqualsArt } from "@/components/ui";
 import { AcceptInvite } from "@/components/accept-invite";
+import { APP_NAME } from "@/lib/brand";
 
 export const metadata: Metadata = { title: "Join a Space", robots: { index: false } };
 
@@ -52,7 +53,7 @@ export default async function JoinPage({ params }: { params: Promise<{ token: st
 
   return (
     <div className="min-h-dvh flex flex-col px-5 sm:px-10 py-6">
-      <Link href="/" aria-label="Eqlshare home"><Logo /></Link>
+      <Link href="/" aria-label={`${APP_NAME} home`}><Logo /></Link>
       <main className="flex-1 grid place-items-center"><div className="w-full max-w-[420px] rise">{body}</div></main>
     </div>
   );

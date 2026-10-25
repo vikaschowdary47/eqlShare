@@ -9,6 +9,7 @@ import { ActivityList } from "@/components/activity";
 import { CATEGORY_LABEL, CategoryGlyph, DueChip, ShareChip, UtilityChip } from "@/components/status";
 import { Avatar, ButtonLink, Card, Chip, EmptyState, Money, Notice, SectionTitle, ShareBar } from "@/components/ui";
 import { ConfirmSettlement, EditBill, MemberShareActions, RemindButton, ResolveDispute, UtilityPaid, ViewStatement } from "@/components/bill-actions";
+import { APP_NAME } from "@/lib/brand";
 
 export const metadata: Metadata = { title: "Bill" };
 
@@ -87,7 +88,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
             <div className="flex-1">
               <p className="text-[15px]"><strong className="font-medium">{iPaid ? "You pay" : `${bill.payer.name} pays`}</strong> the provider{statement?.provider ? ` (${statement.provider})` : ""}.</p>
               <p className="text-[14px] text-muted mt-0.5">
-                {bill.utility_status === "payment_reported" ? `${iPaid ? "You" : payerFirst} reported paying it. Eqlshare can't verify provider payments.` : "This is separate from paying back the people who split it."}
+                {bill.utility_status === "payment_reported" ? `${iPaid ? "You" : payerFirst} reported paying it. ${APP_NAME} can't verify provider payments.` : "This is separate from paying back the people who split it."}
               </p>
             </div>
             <div className="flex gap-2 flex-wrap">

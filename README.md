@@ -1,4 +1,4 @@
-# Eqlshare web
+# eqlTab web
 
 Next.js 15 (App Router, TypeScript, Tailwind 4) + Supabase. Product source of truth: `../EQLSHARE_MASTER_BUILD_SPEC_V0.3.md`.
 

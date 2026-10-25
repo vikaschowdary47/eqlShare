@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { LegalPage } from "../legal";
+import { APP_NAME } from "@/lib/brand";
 
 export const metadata: Metadata = { title: "Terms" };
 
 export default function Terms() {
   return (
     <LegalPage title="Terms">
-      <h2>What Eqlshare is</h2>
+      <h2>What {APP_NAME} is</h2>
       <p>A tool for recording shared bills and who has paid whom. It doesn't process payments, hold funds, or pay providers for you.</p>
       <h2>Accuracy</h2>
       <p>Bill details read from statements are suggestions until a member confirms them. Payment statuses are reported by members. "Confirmed received" means the person owed confirmed it, not that a bank or provider verified it.</p>

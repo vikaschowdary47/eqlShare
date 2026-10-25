@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import type { Result } from "@/lib/actions";
 import { Button, Field, Input, Notice, cx } from "@/components/ui";
+import { APP_NAME } from "@/lib/brand";
 
-/** "Join me on Eqlshare for 12 elm street and Lakeview". 2-person Spaces read as "our balance". */
+/** "Join me on eqlTab for 12 elm street and Lakeview". 2-person Spaces read as "our balance". */
 export function inviteMessage(spaceNames: string[]): string {
   const groups = spaceNames.filter((n) => !/^you & /i.test(n));
   const parts = [...groups, ...(groups.length < spaceNames.length ? ["our balance"] : [])];
   const list = parts.length <= 1 ? parts.join("") : `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}`;
-  return list ? `Join me on Eqlshare for ${list}` : "Join me on Eqlshare";
+  return list ? `Join me on ${APP_NAME} for ${list}` : `Join me on ${APP_NAME}`;
 }
 
 /** Clipboard API needs https; fall back to a hidden textarea so Copy works on http too. */
@@ -61,7 +62,7 @@ export function PersonInvite({ name, spaceNames, url, onCreate, contact }: {
   }
   async function share() {
     try {
-      await navigator.share({ title: "Eqlshare", text, url: link! });
+      await navigator.share({ title: APP_NAME, text, url: link! });
     } catch (e) {
       if ((e as Error).name !== "AbortError") await copy();
     }
