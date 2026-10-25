@@ -142,7 +142,7 @@ export function ImportFlow({ existing, backHref }: { existing: ImportExistingSpa
 
           {step === "guide" && (
             <section className="rise pt-4">
-              <p className="text-[12px] font-medium tracking-[0.16em] text-teal-ink">IMPORT FROM SPLITWISE</p>
+              <p className="text-[12px] font-medium tracking-[0.16em] text-brand-ink">IMPORT FROM SPLITWISE</p>
               <h1 className="mt-3 text-[clamp(30px,6vw,42px)] font-semibold tracking-[-0.04em] leading-[1.05]">Bring your balances over in a minute</h1>
               <p className="mt-3 text-[17px] text-muted">Two screenshots are usually enough: your Friends tab and your Groups tab.</p>
               <GuideArt />
@@ -228,7 +228,7 @@ function Steps({ at }: { at: 1 | 2 }) {
     <ol className="flex items-center gap-2 pt-2 pb-4 text-[13px]" aria-label="Steps">
       {["What we found", "Spaces", "Invite"].map((t, i) => (
         <li key={t} className={cx("flex items-center gap-2", i + 1 === at ? "text-ink font-medium" : "text-muted")} aria-current={i + 1 === at ? "step" : undefined}>
-          <span className={cx("grid place-items-center size-6 rounded-full text-[12px] num", i + 1 === at ? "bg-ink text-white" : i + 1 < at ? "bg-teal-wash text-teal-ink" : "bg-sunken")}>{i + 1}</span>
+          <span className={cx("grid place-items-center size-6 rounded-full text-[12px] num", i + 1 === at ? "bg-ink text-white" : i + 1 < at ? "bg-brand-wash text-brand-ink" : "bg-sunken")}>{i + 1}</span>
           <span className={cx(i + 1 !== at && "hidden sm:inline")}>{t}</span>
           {i < 2 && <span className="w-4 h-px bg-line-strong" aria-hidden="true" />}
         </li>
@@ -311,7 +311,7 @@ function PersonRow({ p, onEdit }: { p: DerivedPerson; onEdit: () => void }) {
     <button type="button" onClick={onEdit} className={cx("w-full text-left rounded-[16px] bg-surface ring-1 p-4 hover:ring-ink/30 transition", flag ? "ring-warning/50" : "ring-line")}>
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-[16px] font-semibold truncate">{p.name}</p>
-        <p className={cx("text-[15px] font-medium num shrink-0", p.totalCents < 0 ? "text-warning" : p.totalCents > 0 ? "text-teal-ink" : "text-muted")}>{totalWords(p.totalCents)}</p>
+        <p className={cx("text-[15px] font-medium num shrink-0", p.totalCents < 0 ? "text-warning" : p.totalCents > 0 ? "text-brand-ink" : "text-muted")}>{totalWords(p.totalCents)}</p>
       </div>
       <p className="mt-1 text-[14px] text-ink-2 leading-relaxed">
         {p.lines.map((l, i) => {
@@ -320,7 +320,7 @@ function PersonRow({ p, onEdit }: { p: DerivedPerson; onEdit: () => void }) {
             <span key={l.groupKey}>
               {i > 0 && <span className="text-muted"> · </span>}
               {l.groupName} {l.cents === null ? <strong className="text-error">amount needed</strong> : <span className="num">{against ? `(${l.cents < 0 ? "you owe" : "owes you"}) ` : ""}{formatUSD(Math.abs(l.cents))}</span>}
-              {l.source === "worked_out" && <span className="ml-1.5 align-middle"><Chip tone="teal">worked out from your totals</Chip></span>}
+              {l.source === "worked_out" && <span className="ml-1.5 align-middle"><Chip tone="brand">worked out from your totals</Chip></span>}
               {l.otherReading !== null && <span className="ml-1.5 align-middle"><Chip tone="warning">another screenshot says {formatUSD(Math.abs(l.otherReading))}</Chip></span>}
             </span>
           );
@@ -386,7 +386,7 @@ function PersonEditor({ review, p, people, onChange, onDone }: { review: ReviewS
                   <AmountInput cents={l.cents === null ? null : Math.abs(c)} onChange={(v) => setLine(l.groupKey, v === null ? null : sign * v)} />
                 </div>
               </div>
-              {l.source === "worked_out" && <p className="text-[13px] text-teal-ink">Worked out from your totals: no screenshot showed this line, but it's the only amount that makes Splitwise's totals add up. Check it.</p>}
+              {l.source === "worked_out" && <p className="text-[13px] text-brand-ink">Worked out from your totals: no screenshot showed this line, but it's the only amount that makes Splitwise's totals add up. Check it.</p>}
               {l.otherReading !== null && <p className="text-[13px] text-warning">Another screenshot shows {formatUSD(Math.abs(l.otherReading))}. We kept the Friends tab amount.</p>}
             </li>
           );
@@ -510,7 +510,7 @@ function AmountInput({ cents, onChange, disabled }: { cents: number | null; onCh
         setLast(c);
         onChange(c);
       }}
-      className="w-full h-10 rounded-[12px] bg-surface ring-1 ring-inset ring-line-strong pl-7 pr-3 text-right num text-[16px] focus:outline-none focus:ring-2 focus:ring-teal disabled:opacity-50" />
+      className="w-full h-10 rounded-[12px] bg-surface ring-1 ring-inset ring-line-strong pl-7 pr-3 text-right num text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-strong disabled:opacity-50" />
   );
 }
 
@@ -524,15 +524,15 @@ function GuideArt() {
         <g key={i}>
           <circle cx="46" cy={80 + i * 24} r="7" fill="var(--sunken)" stroke="var(--line-strong)" />
           <rect x="60" y={76 + i * 24} width="40" height="6" rx="3" fill="var(--line-strong)" />
-          <rect x="106" y={76 + i * 24} width="18" height="6" rx="3" fill={i % 2 ? "var(--teal)" : "var(--warning)"} opacity=".7" />
+          <rect x="106" y={76 + i * 24} width="18" height="6" rx="3" fill={i % 2 ? "var(--brand)" : "var(--warning)"} opacity=".7" />
         </g>
       ))}
-      <path d="M160 100h60" stroke="var(--teal)" strokeWidth="2" strokeDasharray="4 5" />
-      <path d="M212 94l8 6-8 6" fill="none" stroke="var(--teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M160 100h60" stroke="var(--brand)" strokeWidth="2" strokeDasharray="4 5" />
+      <path d="M212 94l8 6-8 6" fill="none" stroke="var(--brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       <rect x="240" y="40" width="160" height="120" rx="18" fill="var(--night)" />
       <text x="258" y="70" fill="#ffffff" opacity=".6" fontSize="11" fontFamily="var(--font-geist)">Your balances</text>
       <text x="258" y="100" fill="#ffffff" fontSize="15" fontFamily="var(--font-geist)">Alex owes you</text>
-      <text x="258" y="126" fill="#5eead4" fontSize="22" fontFamily="var(--font-serif)">$42.50</text>
+      <text x="258" y="126" fill="var(--brand)" fontSize="22" fontFamily="var(--font-serif)">$42.50</text>
     </svg>
   );
 }

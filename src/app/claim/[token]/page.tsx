@@ -48,7 +48,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ token: s
     const inviter = p.inviter_name?.split(" ")[0] ?? "Someone";
     body = (
       <>
-        <p className="text-[13px] font-medium text-teal-ink tracking-[0.14em] uppercase">You're invited</p>
+        <p className="text-[13px] font-medium text-brand-ink tracking-[0.14em] uppercase">You're invited</p>
         <h1 className="mt-2 text-[34px] font-semibold tracking-[-0.04em] leading-[1.05]">{inviter} invited you to Eqlshare</h1>
         <p className="text-muted mt-3">Your balances with {inviter} were brought over from Splitwise as <strong className="text-ink font-medium">{p.person_name}</strong>.</p>
         <div className="mt-6 rounded-[20px] bg-night text-white p-6 grain relative overflow-hidden">

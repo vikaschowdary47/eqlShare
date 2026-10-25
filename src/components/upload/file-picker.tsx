@@ -81,7 +81,7 @@ export function FilePicker({ files, onChange, kinds, max = 1, maxBytes = 10 * 10
       onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDrag(false); }}
       onDrop={(e) => { e.preventDefault(); setDrag(false); add(e.dataTransfer.files); }}
       className={cx("rounded-[18px] border-2 border-dashed p-4 sm:p-6 transition-all duration-300",
-        drag ? "border-teal bg-teal-wash scale-[1.01]" : "border-line-strong bg-surface")}>
+        drag ? "border-brand-strong bg-brand-wash scale-[1.01]" : "border-line-strong bg-surface")}>
       {files.length > 0 && (
         <ul className={cx("mb-5 grid gap-3", kinds.includes("image") ? "grid-cols-3 sm:grid-cols-4" : "grid-cols-1")} aria-label="Added files">
           {files.map((f, i) => (

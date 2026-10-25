@@ -12,7 +12,7 @@ export function DueChip({ state, dueDate }: { state: DueState; dueDate: string |
     const d = daysUntil(dueDate, todayISO());
     return <Chip tone="warning">{d === 0 ? "Due today" : d === 1 ? "Due tomorrow" : `Due in ${d} days`}</Chip>;
   }
-  return <Chip tone="teal">Upcoming</Chip>;
+  return <Chip tone="brand">Upcoming</Chip>;
 }
 
 /** Status of one person's share, from anyone's point of view. */
@@ -21,7 +21,7 @@ export function ShareChip({ position, disputed }: { position: SplitPosition; dis
   if (disputed || position.disputed) return <Chip tone="error">Disputed</Chip>;
   if (position.outstandingCents === 0) return <Chip tone="success">Confirmed received</Chip>;
   if (position.pendingCents > 0) return <Chip tone="warning">Payment reported</Chip>;
-  if (position.confirmedCents > 0) return <Chip tone="teal">Partly paid</Chip>;
+  if (position.confirmedCents > 0) return <Chip tone="brand">Partly paid</Chip>;
   return <Chip>Awaiting payment</Chip>;
 }
 
@@ -32,8 +32,8 @@ export function UtilityChip({ status }: { status: UtilityStatus }) {
   return <Chip>Provider not yet paid</Chip>;
 }
 
-export const STATEMENT_LABEL: Record<Statement["status"], { label: string; tone: "neutral" | "teal" | "success" | "warning" | "error" }> = {
-  ready: { label: "Ready to confirm", tone: "teal" },
+export const STATEMENT_LABEL: Record<Statement["status"], { label: string; tone: "neutral" | "brand" | "success" | "warning" | "error" }> = {
+  ready: { label: "Ready to confirm", tone: "brand" },
   needs_review: { label: "Needs review", tone: "warning" },
   needs_statement: { label: "Statement details needed", tone: "warning" },
   duplicate: { label: "Duplicate", tone: "neutral" },

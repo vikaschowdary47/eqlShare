@@ -59,7 +59,7 @@ export function ActivityList({ items, members, meUserId, spaceId }: { items: Act
         const body = (
           <>
             {a.actor_user_id ? <Avatar name={who === "You" ? names.get(meUserId) ?? "You" : who} size={30} /> :
-              <span className="grid place-items-center size-[30px] rounded-full bg-teal-wash text-teal-ink text-[13px] font-semibold" aria-hidden="true">=</span>}
+              <span className="grid place-items-center size-[30px] rounded-full bg-brand-wash text-brand-ink text-[13px] font-semibold" aria-hidden="true">=</span>}
             <p className="flex-1 min-w-0 text-[14px] text-ink-2"><span className="text-ink">{describe(a, who)}</span></p>
             <time dateTime={a.created_at} className="text-[12px] text-muted shrink-0">{ago(a.created_at)}</time>
           </>

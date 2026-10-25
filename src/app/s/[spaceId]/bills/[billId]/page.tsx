@@ -44,7 +44,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
         <div className="flex-1 min-w-0">
           <h1 className="text-[clamp(26px,5vw,36px)] font-semibold tracking-[-0.04em] leading-tight">{bill.title}</h1>
           <div className="mt-2 flex flex-wrap gap-2">
-            {bill.source === "import" ? <Chip tone="teal">Opening balance · imported from Splitwise</Chip>
+            {bill.source === "import" ? <Chip tone="brand">Opening balance · imported from Splitwise</Chip>
               : bill.status === "published" && <DueChip state={bill.overall} dueDate={bill.due_date} />}
             <UtilityChip status={bill.utility_status} />
             {bill.disputed && <Chip tone="error">Disputed</Chip>}
@@ -150,7 +150,7 @@ export default async function BillPage({ params, searchParams }: { params: Promi
                   <div className="ml-12">
                     {iPaid && reported.map((x) => <ConfirmSettlement key={x.id} spaceId={spaceId} settlementId={x.id} amountCents={x.amount_cents} from={s.member.name.split(" ")[0]} />)}
                     {iPaid && !isMe && s.member.placeholder && s.position.outstandingCents > 0 && (
-                      <p className="mt-2 text-[13px] text-muted">{s.member.name} hasn't joined yet, so they can't get reminders. <Link className="text-teal-ink underline underline-offset-4" href={`/s/${spaceId}/space#members`}>Send invite</Link></p>
+                      <p className="mt-2 text-[13px] text-muted">{s.member.name} hasn't joined yet, so they can't get reminders. <Link className="text-brand-ink underline underline-offset-4" href={`/s/${spaceId}/space#members`}>Send invite</Link></p>
                     )}
                     {iPaid && !isMe && !s.member.placeholder && bill.source !== "import" && s.position.outstandingCents > 0 && s.position.pendingCents === 0 && s.member.status === "active" && (
                       <RemindButton spaceId={spaceId} splitId={s.id} link={link}

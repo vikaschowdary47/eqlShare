@@ -20,7 +20,7 @@ export function BillRow({ bill, spaceId, meId }: { bill: BillView; spaceId: stri
   let right: React.ReactNode;
   if (bill.status === "void") right = <Chip>Voided</Chip>;
   else if (bill.source === "import" && (iPaid ? bill.outstandingCents === 0 : mine?.position.outstandingCents === 0)) right = <Chip tone="success">Settled</Chip>;
-  else if (bill.source === "import" && !(mine?.position.pendingCents || mine?.position.disputed || mine?.disputed_at)) right = <Chip tone="teal">Opening balance</Chip>;
+  else if (bill.source === "import" && !(mine?.position.pendingCents || mine?.position.disputed || mine?.disputed_at)) right = <Chip tone="brand">Opening balance</Chip>;
   else if (iPaid) right = bill.outstandingCents > 0 ? <DueChip state={bill.overall} dueDate={bill.due_date} /> : <Chip tone="success">All received</Chip>;
   else if (mine) right = mine.position.outstandingCents === 0 || mine.position.pendingCents > 0 || mine.position.disputed || mine.disputed_at
     ? <ShareChip position={mine.position} disputed={!!mine.disputed_at} />

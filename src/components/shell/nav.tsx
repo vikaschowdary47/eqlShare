@@ -88,7 +88,7 @@ export function AddMenu({ spaceId, compact }: { spaceId: string; compact?: boole
   return (
     <div ref={ref} className="relative">
       <button type="button" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((o) => !o)}
-        className={cx("inline-flex items-center justify-center gap-2 font-medium text-white bg-ink hover:bg-teal-ink transition-all duration-300 ease-out-soft active:scale-95",
+        className={cx("inline-flex items-center justify-center gap-2 font-medium text-white bg-ink hover:bg-brand-ink transition-all duration-300 ease-out-soft active:scale-95",
           compact ? "size-12 rounded-[16px] shadow-[0_8px_20px_-8px_rgba(11,26,24,0.6)]" : "h-11 w-full rounded-[12px] text-[15px]")}>
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className={cx("transition-transform duration-300", open && "rotate-45")}><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>
         {compact ? <span className="sr-only">Add</span> : "Add"}
@@ -140,7 +140,7 @@ export function SpaceSwitcher({ current, spaces }: { current: { id: string; name
               className="flex items-center gap-3 rounded-[12px] px-3 py-2.5 hover:bg-sunken">
               <span className="grid place-items-center size-7 rounded-[8px] bg-sunken ring-1 ring-line text-[12px] font-semibold" aria-hidden="true">{s.name.slice(0, 1).toUpperCase()}</span>
               <span className="flex-1 min-w-0"><span className="block text-[14px] font-medium truncate">{s.name}</span><span className="block text-[12px] text-muted">{s.typeLabel}</span></span>
-              {s.id === current.id && <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="var(--teal)" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+              {s.id === current.id && <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="var(--brand-strong)" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>}
             </Link>
           ))}
           <div className="h-px bg-line my-1.5" />

@@ -5,7 +5,7 @@ import { formatDate } from "./domain/due";
 
 export interface AttentionItem {
   key: string;
-  tone: "error" | "warning" | "teal";
+  tone: "error" | "warning" | "brand";
   title: string;
   detail: string;
   href: string;
@@ -41,7 +41,7 @@ export function buildAttention(spaceId: string, bills: BillView[], statements: S
     const href = `/s/${spaceId}/auto-bills/${s.id}`;
     const name = s.provider ?? "A statement";
     if (s.status === "needs_review") out.push({ key: `st-${s.id}`, tone: "warning", title: `${name} needs review`, detail: s.reasons[0] ?? "Check the details before sharing.", href, cta: "Review" });
-    if (s.status === "ready") out.push({ key: `st-${s.id}`, tone: "teal", title: `We found a new ${name} bill`, detail: `${s.amount_cents !== null ? formatUSD(s.amount_cents) : ""}${s.due_date ? ` · due ${formatDate(s.due_date)}` : ""}. Check the details before sharing.`, href, cta: "Confirm" });
+    if (s.status === "ready") out.push({ key: `st-${s.id}`, tone: "brand", title: `We found a new ${name} bill`, detail: `${s.amount_cents !== null ? formatUSD(s.amount_cents) : ""}${s.due_date ? ` · due ${formatDate(s.due_date)}` : ""}. Check the details before sharing.`, href, cta: "Confirm" });
     if (s.status === "needs_statement") out.push({ key: `st-${s.id}`, tone: "warning", title: "Statement details needed", detail: `We received a ${name} notification, but not the amount or due date. Upload the statement to continue.`, href: `/s/${spaceId}/auto-bills`, cta: "Upload" });
     if (s.status === "failed") out.push({ key: `st-${s.id}`, tone: "error", title: "We couldn't read a statement", detail: s.file_name ?? "Try a different PDF, or enter the bill yourself.", href, cta: "Open" });
   }
@@ -49,6 +49,6 @@ export function buildAttention(spaceId: string, bills: BillView[], statements: S
   for (const m of missingStatements(statements, today))
     out.push({ key: `miss-${m.provider}`, tone: "warning", title: `We haven't received this month's ${m.provider} bill`, detail: "That doesn't mean it's paid. Check your email or the provider's site, then upload it.", href: `/s/${spaceId}/auto-bills`, cta: "Upload" });
 
-  const rank = { error: 0, warning: 1, teal: 2 };
+  const rank = { error: 0, warning: 1, brand: 2 };
   return out.sort((a, b) => rank[a.tone] - rank[b.tone]);
 }

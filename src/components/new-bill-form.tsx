@@ -66,8 +66,8 @@ export function NewBillForm(props: {
         <Link href={`/s/${props.spaceId}/bills`} className="text-[14px] text-ink-2 hover:text-ink">← Cancel</Link>
         <ol className="flex items-center gap-2 text-[13px]" aria-label="Progress">
           {steps.map((s, i) => (
-            <li key={s} aria-current={step === i + 1 ? "step" : undefined} className={cx("flex items-center gap-2", step === i + 1 ? "text-ink font-medium" : step > i + 1 ? "text-teal-ink" : "text-muted")}>
-              <span className={cx("grid place-items-center size-6 rounded-full text-[12px] num", step === i + 1 ? "bg-ink text-white" : step > i + 1 ? "bg-teal-wash" : "bg-sunken")}>{step > i + 1 ? "✓" : i + 1}</span>
+            <li key={s} aria-current={step === i + 1 ? "step" : undefined} className={cx("flex items-center gap-2", step === i + 1 ? "text-ink font-medium" : step > i + 1 ? "text-brand-ink" : "text-muted")}>
+              <span className={cx("grid place-items-center size-6 rounded-full text-[12px] num", step === i + 1 ? "bg-ink text-white" : step > i + 1 ? "bg-brand-wash" : "bg-sunken")}>{step > i + 1 ? "✓" : i + 1}</span>
               <span className="hidden sm:inline">{s}</span>
             </li>
           ))}
@@ -83,7 +83,7 @@ export function NewBillForm(props: {
             <div className="space-y-5 rise">
               <div>
                 <label htmlFor="amount" className="block text-[13px] font-medium text-ink-2 mb-1.5">Total amount</label>
-                <div className={cx("flex items-baseline gap-1 border-b-2 pb-2 transition-colors focus-within:border-teal", touched && detailsErrors.amount ? "border-error" : "border-line-strong")}>
+                <div className={cx("flex items-baseline gap-1 border-b-2 pb-2 transition-colors focus-within:border-brand-strong", touched && detailsErrors.amount ? "border-error" : "border-line-strong")}>
                   <span className="figure text-[40px] text-muted" aria-hidden="true">$</span>
                   <input id="amount" inputMode="decimal" autoComplete="off" autoFocus value={amount} placeholder="0.00"
                     aria-invalid={touched && !!detailsErrors.amount} aria-describedby="amount-error"
@@ -114,7 +114,7 @@ export function NewBillForm(props: {
               </div>
               <Field label="Note (optional)" htmlFor="note">
                 <textarea id="note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} rows={2}
-                  className="block w-full rounded-[12px] bg-surface p-3.5 text-[16px] ring-1 ring-inset ring-line-strong focus:outline-none focus:ring-2 focus:ring-teal" placeholder="Account ending 7890, Sept usage" />
+                  className="block w-full rounded-[12px] bg-surface p-3.5 text-[16px] ring-1 ring-inset ring-line-strong focus:outline-none focus:ring-2 focus:ring-brand-strong" placeholder="Account ending 7890, Sept usage" />
               </Field>
             </div>
           )}

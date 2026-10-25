@@ -11,23 +11,32 @@ export function Logo({ className, tone = "ink" }: { className?: string; tone?: "
   const c = tone === "light" ? "#ffffff" : "var(--ink)";
   return (
     <span className={cx("inline-flex items-center gap-2.5 font-semibold tracking-[-0.03em] text-[19px]", className)} style={{ color: c }}>
-      <svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true">
-        <rect x="0" y="2" width="22" height="3.2" rx="1.6" fill={c} />
-        <rect x="0" y="10.8" width="22" height="3.2" rx="1.6" fill="var(--teal)" />
-      </svg>
+      <LogoMark size={26} />
       eqlshare
     </span>
+  );
+}
+
+/** The app icon (brand/eqlshare-icon.svg), with rounded corners for in-app use. */
+export function LogoMark({ size = 26, className }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 1024 1024" aria-hidden="true" className={cx("shrink-0", className)}>
+      <rect width="1024" height="1024" rx="232" fill="var(--brand)" />
+      <circle cx="512" cy="512" r="347" fill="#ffffff" />
+      <rect x="126" y="362" width="772" height="95" fill="var(--brand)" />
+      <rect x="126" y="567" width="772" height="95" fill="var(--brand)" />
+    </svg>
   );
 }
 
 /* ---------- buttons ---------- */
 type Variant = "primary" | "secondary" | "ghost" | "danger" | "night";
 const variants: Record<Variant, string> = {
-  primary: "bg-ink text-white hover:bg-teal-ink shadow-[0_1px_0_rgba(255,255,255,0.1)_inset,0_1px_2px_rgba(11,26,24,0.2)]",
+  primary: "bg-ink text-white hover:bg-brand-ink shadow-[0_1px_0_rgba(255,255,255,0.1)_inset,0_1px_2px_rgba(11,26,24,0.2)]",
   secondary: "bg-surface text-ink ring-1 ring-inset ring-line-strong hover:ring-ink/40 hover:bg-sunken",
   ghost: "text-ink-2 hover:bg-sunken hover:text-ink",
   danger: "bg-surface text-error ring-1 ring-inset ring-error/30 hover:bg-error-wash",
-  night: "bg-white text-ink hover:bg-teal-wash",
+  night: "bg-white text-ink hover:bg-brand-wash",
 };
 const sizes = { sm: "h-9 px-3.5 text-[14px] rounded-[10px]", md: "h-11 px-5 text-[15px] rounded-[12px]", lg: "h-[52px] px-6 text-[16px] rounded-[14px]" };
 
@@ -73,7 +82,7 @@ export function Field({ label, hint, error, children, htmlFor }: { label: string
 
 export const inputClass =
   "block w-full h-12 rounded-[12px] bg-surface px-3.5 text-[16px] text-ink ring-1 ring-inset ring-line-strong placeholder:text-muted/70 " +
-  "transition-shadow focus:outline-none focus:ring-2 focus:ring-teal aria-[invalid=true]:ring-error";
+  "transition-shadow focus:outline-none focus:ring-2 focus:ring-brand-strong aria-[invalid=true]:ring-error";
 
 export function Input(props: ComponentProps<"input">) {
   return <input {...props} className={cx(inputClass, props.className)} />;
@@ -118,8 +127,8 @@ export function ShareBar({ parts, tone = "light", className }: { parts: { key: s
   const total = parts.reduce((a, p) => a + p.cents, 0) || 1;
   const color = (s: string) =>
     tone === "dark"
-      ? { paid: "bg-[#5eead4]", pending: "bg-[#5eead4]/45 bg-[repeating-linear-gradient(135deg,transparent_0_3px,rgba(11,26,24,.35)_3px_5px)]", open: "bg-white/18", own: "bg-white/40" }[s]
-      : { paid: "bg-teal", pending: "bg-teal/40 bg-[repeating-linear-gradient(135deg,transparent_0_3px,rgba(255,255,255,.6)_3px_5px)]", open: "bg-line-strong", own: "bg-ink-2/30" }[s];
+      ? { paid: "bg-brand", pending: "bg-brand/45 bg-[repeating-linear-gradient(135deg,transparent_0_3px,rgba(11,26,24,.35)_3px_5px)]", open: "bg-white/18", own: "bg-white/40" }[s]
+      : { paid: "bg-brand", pending: "bg-brand/40 bg-[repeating-linear-gradient(135deg,transparent_0_3px,rgba(255,255,255,.6)_3px_5px)]", open: "bg-line-strong", own: "bg-ink-2/30" }[s];
   return (
     <div className={cx("flex h-2 w-full gap-[3px]", className)} aria-hidden="true">
       {parts.map((p, i) => (
@@ -130,17 +139,17 @@ export function ShareBar({ parts, tone = "light", className }: { parts: { key: s
 }
 
 /* ---------- status ---------- */
-export type Tone = "neutral" | "teal" | "success" | "warning" | "error";
+export type Tone = "neutral" | "brand" | "success" | "warning" | "error";
 const toneClass: Record<Tone, string> = {
   neutral: "bg-sunken text-ink-2",
-  teal: "bg-teal-wash text-teal-ink",
+  brand: "bg-brand-wash text-brand-ink",
   success: "bg-success-wash text-success",
   warning: "bg-warning-wash text-warning",
   error: "bg-error-wash text-error",
 };
 const toneIcon: Record<Tone, ReactNode> = {
   neutral: <circle cx="5" cy="5" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.6" />,
-  teal: <circle cx="5" cy="5" r="3.5" fill="currentColor" />,
+  brand: <circle cx="5" cy="5" r="3.5" fill="currentColor" />,
   success: <path d="M1.8 5.2l2.1 2.1L8.4 2.8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />,
   warning: <path d="M5 1.5v4M5 7.8v.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />,
   error: <path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />,
@@ -157,7 +166,7 @@ export function Chip({ tone = "neutral", children, className }: { tone?: Tone; c
 
 /* ---------- feedback ---------- */
 export function Notice({ tone = "neutral", title, children, action }: { tone?: Tone; title: string; children?: ReactNode; action?: ReactNode }) {
-  const border = { neutral: "ring-line", teal: "ring-teal/25", success: "ring-success/25", warning: "ring-warning/30", error: "ring-error/30" }[tone];
+  const border = { neutral: "ring-line", brand: "ring-brand-strong/25", success: "ring-success/25", warning: "ring-warning/30", error: "ring-error/30" }[tone];
   return (
     <div role={tone === "error" ? "alert" : "status"} className={cx("rounded-[14px] p-4 ring-1 flex gap-3 items-start", toneClass[tone].split(" ")[0], border)}>
       <span className={cx("mt-0.5 grid place-items-center size-5 rounded-full shrink-0", toneClass[tone])}>
@@ -188,8 +197,8 @@ export function EqualsArt() {
     <svg width="64" height="44" viewBox="0 0 64 44" aria-hidden="true">
       <rect x="2" y="8" width="60" height="9" rx="4.5" fill="var(--line)" />
       <rect x="2" y="8" width="38" height="9" rx="4.5" fill="var(--ink)" className="grow-x" />
-      <rect x="2" y="27" width="60" height="9" rx="4.5" fill="var(--teal-wash)" />
-      <rect x="2" y="27" width="60" height="9" rx="4.5" fill="var(--teal)" className="grow-x" style={{ animationDelay: "150ms" }} />
+      <rect x="2" y="27" width="60" height="9" rx="4.5" fill="var(--brand-wash)" />
+      <rect x="2" y="27" width="60" height="9" rx="4.5" fill="var(--brand)" className="grow-x" style={{ animationDelay: "150ms" }} />
     </svg>
   );
 }

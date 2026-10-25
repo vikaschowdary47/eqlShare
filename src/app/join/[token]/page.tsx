@@ -41,7 +41,7 @@ export default async function JoinPage({ params }: { params: Promise<{ token: st
     } else {
       body = (
         <>
-          <p className="text-[13px] font-medium text-teal-ink tracking-[0.14em] uppercase">{SPACE_PRESETS[p.space_type!].label}</p>
+          <p className="text-[13px] font-medium text-brand-ink tracking-[0.14em] uppercase">{SPACE_PRESETS[p.space_type!].label}</p>
           <h1 className="mt-2 text-[36px] font-semibold tracking-[-0.04em] leading-[1.05]">Join {p.space_name}</h1>
           <p className="text-muted mt-3"><strong className="text-ink font-medium">{p.inviter}</strong> invited you. Once you join, you'll see this Space's bills and your share of each one. Other members will see your name.</p>
           <div className="mt-8">{p.already_member ? <ButtonLink href="/home" size="lg" full>You're already a member. Open Space</ButtonLink> : <AcceptInvite token={token} />}</div>

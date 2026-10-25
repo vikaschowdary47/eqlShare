@@ -28,7 +28,7 @@ function useAction() {
   return { error, pending, run };
 }
 
-const textarea = "block w-full rounded-[12px] bg-surface p-3 text-[15px] ring-1 ring-inset ring-line-strong focus:outline-none focus:ring-2 focus:ring-teal";
+const textarea = "block w-full rounded-[12px] bg-surface p-3 text-[15px] ring-1 ring-inset ring-line-strong focus:outline-none focus:ring-2 focus:ring-brand-strong";
 
 /** For the member who owes: record a payment made outside Eqlshare, or dispute the share. */
 export function MemberShareActions({ spaceId, splitId, reportableCents, payerFirst, disputed }: { spaceId: string; splitId: string; reportableCents: number; payerFirst: string; disputed: boolean }) {

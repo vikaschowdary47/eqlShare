@@ -71,7 +71,7 @@ export function Onboarding({ firstName, hasSpaces }: { firstName: string; hasSpa
 
           {step === "type" && (
             <section className="rise" aria-labelledby="t">
-              <p className="text-[12px] font-medium tracking-[0.16em] text-teal-ink">EQLSHARE · GET STARTED</p>
+              <p className="text-[12px] font-medium tracking-[0.16em] text-brand-ink">EQLSHARE · GET STARTED</p>
               <h1 id="t" className="mt-3 text-[clamp(32px,6vw,44px)] font-semibold tracking-[-0.04em] leading-[1.05]">What are you sharing?</h1>
               <p className="mt-3 text-[17px] text-muted">Choose a Space type. You can customize it later.</p>
               <div role="radiogroup" aria-labelledby="t" className="mt-8 grid gap-3">
@@ -109,7 +109,7 @@ export function Onboarding({ firstName, hasSpaces }: { firstName: string; hasSpa
                 <span aria-hidden="true">→</span>
               </Link>
               <p className="mt-6 text-center text-[15px] text-ink-2">
-                Have an invite? <button type="button" onClick={() => { setError(null); setStep("join"); }} className="font-medium text-teal-ink underline underline-offset-4 decoration-teal/30 hover:decoration-teal">Join an existing Space</button>
+                Have an invite? <button type="button" onClick={() => { setError(null); setStep("join"); }} className="font-medium text-brand-ink underline underline-offset-4 decoration-brand-strong/30 hover:decoration-brand-strong">Join an existing Space</button>
               </p>
             </section>
           )}

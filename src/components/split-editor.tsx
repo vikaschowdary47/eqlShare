@@ -95,13 +95,13 @@ export function SplitEditor({ s, payerId }: { s: SplitState; payerId: string }) 
                 {s.method === "exact" && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true">$</span>}
                 <input id={`v-${m.id}`} inputMode="decimal" autoComplete="off" value={s.values[m.id] ?? ""} placeholder={s.method === "exact" ? "0.00" : "0"}
                   onChange={(e) => s.setValues({ ...s.values, [m.id]: e.target.value.replace(/[^\d.]/g, "") })}
-                  className={cx("w-full h-11 rounded-[12px] bg-surface ring-1 ring-inset ring-line-strong text-right num text-[16px] focus:outline-none focus:ring-2 focus:ring-teal",
+                  className={cx("w-full h-11 rounded-[12px] bg-surface ring-1 ring-inset ring-line-strong text-right num text-[16px] focus:outline-none focus:ring-2 focus:ring-brand-strong",
                     s.method === "exact" ? "pl-7 pr-3" : "pl-3 pr-8")} />
                 {s.method === "percent" && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true">%</span>}
               </div>
             </div>
           ))}
-          <button type="button" onClick={s.fillEvenly} className="text-[14px] text-teal-ink underline underline-offset-4 decoration-teal/30 hover:decoration-teal">Fill in evenly, then adjust</button>
+          <button type="button" onClick={s.fillEvenly} className="text-[14px] text-brand-ink underline underline-offset-4 decoration-brand-strong/30 hover:decoration-brand-strong">Fill in evenly, then adjust</button>
         </div>
       )}
     </div>

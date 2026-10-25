@@ -13,7 +13,7 @@ export function SignInForm({ next }: { next: string }) {
       {state && !state.ok && <Notice tone="error" title={state.error} />}
       <Field label="Email" htmlFor="email"><Input id="email" name="email" type="email" autoComplete="email" required /></Field>
       <Field label="Password" htmlFor="password"><Input id="password" name="password" type="password" autoComplete="current-password" required /></Field>
-      <div className="flex justify-end -mt-1"><Link href="/forgot" className="text-[14px] text-teal-ink underline underline-offset-4 decoration-teal/30 hover:decoration-teal">Forgot password?</Link></div>
+      <div className="flex justify-end -mt-1"><Link href="/forgot" className="text-[14px] text-brand-ink underline underline-offset-4 decoration-brand-strong/30 hover:decoration-brand-strong">Forgot password?</Link></div>
       <Button type="submit" size="lg" full loading={pending}>Sign in</Button>
     </form>
   );
@@ -24,7 +24,7 @@ export function SignUpForm({ next }: { next: string }) {
   const [show, setShow] = useState(false);
   if (state?.ok) {
     return (
-      <Notice tone="teal" title="Check your inbox">
+      <Notice tone="brand" title="Check your inbox">
         We sent a confirmation link to <strong>{state.data.email}</strong>. Open it on this device to continue.
       </Notice>
     );
@@ -51,7 +51,7 @@ export function SignUpForm({ next }: { next: string }) {
 
 export function ForgotForm() {
   const [state, action, pending] = useActionState(sendResetAction, null);
-  if (state?.ok) return <Notice tone="teal" title="Check your email">If an account exists for that address, a reset link is on its way.</Notice>;
+  if (state?.ok) return <Notice tone="brand" title="Check your email">If an account exists for that address, a reset link is on its way.</Notice>;
   return (
     <form action={action} className="space-y-4">
       <Field label="Email" htmlFor="email"><Input id="email" name="email" type="email" autoComplete="email" required /></Field>

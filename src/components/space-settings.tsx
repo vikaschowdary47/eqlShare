@@ -100,7 +100,7 @@ export function Members({ spaceId, spaceName, members, meId, isOwner }: { spaceI
     <div>
       {r.error && <div className="mb-3"><Notice tone="error" title={r.error} /></div>}
       {isOwner && pending.length > 0 && (
-        <div className="mb-4 rounded-[14px] bg-teal-wash/60 ring-1 ring-teal/20 p-4 flex flex-wrap items-center gap-3">
+        <div className="mb-4 rounded-[14px] bg-brand-wash/60 ring-1 ring-brand-strong/20 p-4 flex flex-wrap items-center gap-3">
           <p className="flex-1 min-w-[200px] text-[14px] text-ink-2"><strong className="text-ink">{pending.length} {pending.length === 1 ? "person hasn't" : "people haven't"} joined.</strong> Each gets a personal link to their own balances. Send each one only to that person.</p>
           <Button size="sm" loading={busyAll} onClick={inviteAll}>Invite all</Button>
         </div>
@@ -116,7 +116,7 @@ export function Members({ spaceId, spaceName, members, meId, isOwner }: { spaceI
                 <p className="text-[15px] font-medium truncate">{m.name}{me && <span className="text-muted font-normal"> (you)</span>}</p>
                 <p className="text-[13px] text-muted">{m.status === "inactive" ? `Left ${m.left?.slice(0, 10)}` : m.placeholder ? "Hasn't joined yet" : `Joined ${m.joined.slice(0, 10)}`}</p>
               </div>
-              {m.status === "inactive" ? <Chip>Former member</Chip> : m.placeholder ? <Chip tone="warning">Not joined</Chip> : m.role === "owner" ? <Chip tone="teal">Owner</Chip> : <Chip>Member</Chip>}
+              {m.status === "inactive" ? <Chip>Former member</Chip> : m.placeholder ? <Chip tone="warning">Not joined</Chip> : m.role === "owner" ? <Chip tone="brand">Owner</Chip> : <Chip>Member</Chip>}
               {m.status === "active" && m.placeholder && isOwner && m.personId && (
                 <PersonInvite name={m.name} spaceNames={[spaceName]} url={link ?? null} onCreate={create(m.personId)} contact={contacts[m.personId]} />
               )}
@@ -225,7 +225,7 @@ function Toggle({ id, label, checked, onChange }: { id: string; label: string; c
       <span className="text-[15px]">{label}</span>
       <span className="relative inline-flex">
         <input id={id} type="checkbox" role="switch" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
-        <span className="w-11 h-[26px] rounded-full bg-line-strong peer-checked:bg-teal transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-teal peer-focus-visible:ring-offset-2" />
+        <span className="w-11 h-[26px] rounded-full bg-line-strong peer-checked:bg-brand-strong transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-brand-strong peer-focus-visible:ring-offset-2" />
         <span className="absolute top-[3px] left-[3px] size-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-[18px]" />
       </span>
     </label>

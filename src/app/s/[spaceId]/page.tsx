@@ -108,13 +108,13 @@ export default async function Dashboard({ params, searchParams }: { params: Prom
       {/* Signature: the obligation card. Individual amounts only, never the Space total. */}
       <section aria-label="Your balance" className="grid md:grid-cols-[1.4fr_1fr] gap-4 rise-2">
         <div className="relative overflow-hidden rounded-[24px] bg-night text-white p-6 sm:p-8 grain">
-          <div aria-hidden="true" className="absolute -right-24 -top-24 size-72 rounded-full bg-teal/30 blur-3xl" />
+          <div aria-hidden="true" className="absolute -right-24 -top-24 size-72 rounded-full bg-brand/30 blur-3xl" />
           <p className="text-[14px] text-white/65">Your share due</p>
           <Money cents={t.youOwe} size="xl" className="block mt-2 text-white" />
           <p className="mt-3 text-[15px] text-white/70">
             {t.youOwe === 0 ? "You're all settled up." : `Across ${myOpen.length} ${myOpen.length === 1 ? "bill" : "bills"}${nextDue ? ` · next due ${formatDate(nextDue.due_date)}` : ""}`}
           </p>
-          {t.youOwePending > 0 && <p className="mt-1 text-[14px] text-[#5eead4]">{formatUSD(t.youOwePending)} reported, waiting for confirmation</p>}
+          {t.youOwePending > 0 && <p className="mt-1 text-[14px] text-brand">{formatUSD(t.youOwePending)} reported, waiting for confirmation</p>}
           {myOpen.length > 0 && (
             <ShareBar tone="dark" className="mt-6"
               parts={myOpen.map((b) => ({ key: b.id, cents: b.mine!.position.outstandingCents, state: b.mine!.position.pendingCents > 0 ? "pending" : "open" }))} />
@@ -137,12 +137,12 @@ export default async function Dashboard({ params, searchParams }: { params: Prom
               <Card className="divide-y divide-line overflow-hidden">
                 {attention.slice(0, 6).map((a) => (
                   <Link key={a.key} href={a.href} className="flex items-start gap-3.5 px-4 sm:px-5 py-4 hover:bg-sunken/60">
-                    <span aria-hidden="true" className={cx("mt-1.5 size-2 rounded-full shrink-0", a.tone === "error" ? "bg-error" : a.tone === "warning" ? "bg-warning" : "bg-teal")} />
+                    <span aria-hidden="true" className={cx("mt-1.5 size-2 rounded-full shrink-0", a.tone === "error" ? "bg-error" : a.tone === "warning" ? "bg-warning" : "bg-brand")} />
                     <span className="flex-1 min-w-0">
                       <span className="block text-[15px] font-medium">{a.title}</span>
                       <span className="block text-[14px] text-muted">{a.detail}</span>
                     </span>
-                    <span className="text-[14px] font-medium text-teal-ink shrink-0 mt-0.5">{a.cta} →</span>
+                    <span className="text-[14px] font-medium text-brand-ink shrink-0 mt-0.5">{a.cta} →</span>
                   </Link>
                 ))}
               </Card>
@@ -151,7 +151,7 @@ export default async function Dashboard({ params, searchParams }: { params: Prom
           )}
 
           <section aria-labelledby="up">
-            <SectionTitle id="up" action={<Link href={`/s/${spaceId}/bills`} className="text-[14px] text-teal-ink hover:underline underline-offset-4">All bills</Link>}>Upcoming bills</SectionTitle>
+            <SectionTitle id="up" action={<Link href={`/s/${spaceId}/bills`} className="text-[14px] text-brand-ink hover:underline underline-offset-4">All bills</Link>}>Upcoming bills</SectionTitle>
             {upcoming.length ? (
               <Card className="divide-y divide-line overflow-hidden">{upcoming.map((b) => <BillRow key={b.id} bill={b} spaceId={spaceId} meId={meId} />)}</Card>
             ) : (
@@ -161,7 +161,7 @@ export default async function Dashboard({ params, searchParams }: { params: Prom
         </div>
 
         <section aria-labelledby="recent" className="min-w-0">
-          <SectionTitle id="recent" action={<Link href={`/s/${spaceId}/activity`} className="text-[14px] text-teal-ink hover:underline underline-offset-4">View all</Link>}>Recent activity</SectionTitle>
+          <SectionTitle id="recent" action={<Link href={`/s/${spaceId}/activity`} className="text-[14px] text-brand-ink hover:underline underline-offset-4">View all</Link>}>Recent activity</SectionTitle>
           <Card className="overflow-hidden">
             {activity.length ? <ActivityList items={activity} members={ctx.members} meUserId={ctx.userId} spaceId={spaceId} /> : <p className="p-5 text-muted text-[14px]">No activity yet.</p>}
           </Card>

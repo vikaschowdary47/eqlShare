@@ -34,7 +34,7 @@ export function InvitePeople({ people, doneHref }: { people: Person[]; doneHref:
           <ol className="flex items-center gap-2 pt-2 pb-4 text-[13px]" aria-label="Steps">
             {["What we found", "Spaces", "Invite"].map((t, i) => (
               <li key={t} className={cx("flex items-center gap-2", i === 2 ? "text-ink font-medium" : "text-muted")} aria-current={i === 2 ? "step" : undefined}>
-                <span className={cx("grid place-items-center size-6 rounded-full text-[12px] num", i === 2 ? "bg-ink text-white" : "bg-teal-wash text-teal-ink")}>{i < 2 ? "✓" : 3}</span>
+                <span className={cx("grid place-items-center size-6 rounded-full text-[12px] num", i === 2 ? "bg-ink text-white" : "bg-brand-wash text-brand-ink")}>{i < 2 ? "✓" : 3}</span>
                 <span className={cx(i !== 2 && "hidden sm:inline")}>{t}</span>
                 {i < 2 && <span className="w-4 h-px bg-line-strong" aria-hidden="true" />}
               </li>
@@ -47,7 +47,7 @@ export function InvitePeople({ people, doneHref }: { people: Person[]; doneHref:
             </div>
             {error && <Notice tone="error" title={error} />}
             {waiting.length > 1 && (
-              <div className="rounded-[14px] bg-teal-wash/60 ring-1 ring-teal/20 p-4 flex flex-wrap items-center gap-3">
+              <div className="rounded-[14px] bg-brand-wash/60 ring-1 ring-brand-strong/20 p-4 flex flex-wrap items-center gap-3">
                 <p className="flex-1 min-w-[200px] text-[14px] text-ink-2">Get every link ready, then share each one.</p>
                 <Button size="sm" loading={busy} onClick={inviteAll}>Invite all</Button>
               </div>

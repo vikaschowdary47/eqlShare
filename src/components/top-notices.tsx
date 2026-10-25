@@ -32,7 +32,7 @@ export function TopNotices({ notes, claimed }: { notes: Note[]; claimed: number 
         </Notice>
       )}
       {shown.length > 0 && (
-        <Notice tone="teal" title={shown.length === 1 ? text(shown[0])! : `${shown.length} people joined`}
+        <Notice tone="brand" title={shown.length === 1 ? text(shown[0])! : `${shown.length} people joined`}
           action={<Button size="sm" variant="secondary" loading={pending} onClick={() => start(async () => { await dismissNotificationsAction(shown.map((n) => n.id)); setHidden(true); router.refresh(); })}>Dismiss</Button>}>
           {shown.length > 1 ? shown.map((n) => text(n)).join(" · ") : "Their balances are now connected to their own account."}
         </Notice>
