@@ -8,8 +8,8 @@
  * Run: npm run icons
  *
  * Writes (Next.js file conventions, so no <link> tags are needed):
- *   src/app/icon.svg                  favicon.svg for modern browsers
- *   src/app/icon1.png..icon3.png      favicon PNGs 16, 32, 48
+ *   src/app/icon.svg                  favicon.svg; switches to the dark icon's colours in dark mode
+ *   public/icons/favicon-16/32/48.png favicon PNGs (not linked, so browsers use the switching SVG)
  *   src/app/favicon.ico               16, 32, 48
  *   src/app/apple-icon.png            180 from the default icon, full bleed (iOS rounds it)
  *   public/icons/icon-192.png, icon-512.png       PWA, default icon
@@ -26,7 +26,24 @@ import sharp from "sharp";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PREFIX = "eqlshare";
 const src = async (name) => readFile(join(root, `brand/${PREFIX}-${name}.svg`));
-const [icon, mono, favicon] = await Promise.all([src("icon"), src("icon-mono"), src("favicon")]);
+const [icon, dark, mono, favicon] = await Promise.all([src("icon"), src("icon-dark"), src("icon-mono"), src("favicon")]);
+
+/**
+ * The favicon with a prefers-color-scheme rule, so the browser tab shows the dark icon in dark mode.
+ * Colours come from the two 1024 icons: background = the square's fill, mark = the circle's fill.
+ */
+function adaptiveFavicon() {
+  const fills = (svg) => {
+    const t = svg.toString();
+    return { bg: t.match(/<rect[^>]*fill="(#[0-9a-f]{6})"/i)[1], fg: t.match(/<circle[^>]*fill="(#[0-9a-f]{6})"/i)[1] };
+  };
+  const light = fills(icon), night = fills(dark);
+  let t = favicon.toString();
+  t = t.replaceAll(`fill="${light.bg}"`, 'class="bg"').replaceAll(`fill="${light.fg}"`, 'class="fg"');
+  if (!t.includes('class="bg"') || !t.includes('class="fg"')) throw new Error("favicon colours don't match the default icon");
+  const style = `<style>.bg{fill:${light.bg}}.fg{fill:${light.fg}}@media (prefers-color-scheme:dark){.bg{fill:${night.bg}}.fg{fill:${night.fg}}}</style>`;
+  return Buffer.from(t.replace(/(<svg[^>]*>)/, `$1\n  ${style}`));
+}
 // Render each SVG at 4x its target size, then downscale, so small sizes stay crisp
 const png = (svg, size, base = 1024) => sharp(svg, { density: 72 * (size / base) * 4 }).resize(size, size).png({ compressionLevel: 9 }).toBuffer();
 
@@ -57,8 +74,8 @@ const out = async (rel, data) => {
 };
 
 const fav = await Promise.all([16, 32, 48].map(async (size) => ({ size, data: await png(favicon, size, 32) })));
-await out("src/app/icon.svg", favicon);
-for (const [i, f] of fav.entries()) await out(`src/app/icon${i + 1}.png`, f.data);
+await out("src/app/icon.svg", adaptiveFavicon());
+for (const f of fav) await out(`public/icons/favicon-${f.size}.png`, f.data);
 await out("src/app/favicon.ico", ico(fav));
 await out("src/app/apple-icon.png", await png(icon, 180));
 await out("public/icons/icon-192.png", await png(icon, 192));
