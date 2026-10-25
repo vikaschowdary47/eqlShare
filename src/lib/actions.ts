@@ -327,7 +327,8 @@ export async function uploadStatementAction(spaceId: string, form: FormData): Pr
     let text = "";
     try {
       const { extractText, getDocumentProxy } = await import("unpdf");
-      const pdf = await getDocumentProxy(bytes);
+      // pdf.js detaches the buffer it's given; parse a copy so the original can still be stored
+      const pdf = await getDocumentProxy(bytes.slice());
       const out = await extractText(pdf, { mergePages: false });
       text = (Array.isArray(out.text) ? out.text : [out.text]).join("\n");
     } catch {
@@ -335,6 +336,8 @@ export async function uploadStatementAction(spaceId: string, form: FormData): Pr
     }
     const path = `${spaceId}/${crypto.randomUUID()}.pdf`;
     const { error: upErr } = await supabase.storage.from("statements").upload(path, bytes, { contentType: "application/pdf", upsert: false });
+    // Error message only, never file contents
+    if (upErr) console.warn(JSON.stringify({ event: "statement_store_failed", error: upErr.message }));
     storedPath = upErr ? null : path;
     e = extractStatement(text);
     unreadable = text.trim().length < 20;
